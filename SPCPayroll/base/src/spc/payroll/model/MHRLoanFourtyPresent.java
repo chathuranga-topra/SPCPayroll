@@ -32,15 +32,15 @@ public class MHRLoanFourtyPresent extends X_HR_LoanFourtyPresent{
 		
 		//40 present earnings
 		sql = "select NVL(sum(amount) , 0) from HR_LoanFourtyPresent where hr_loan_ID = ? "
-			+ "and hr_concept_category_id = 1000000";
-		amt = DB.getSQLValueBD(get_TrxName(), sql, this.getHR_Loan_ID());
+			+ "and hr_concept_category_id = ? ";
+		amt = DB.getSQLValueBD(get_TrxName(), sql, this.getHR_Loan_ID() , HardCodedVal.hr_concept_category_idEarning);
 		
 		loan.setFourtyPresent(amt);
 		
 		//set total deduction
-		sql = "select NVL(sum(amount) , 0)  from HR_LoanFourtyPresent where hr_loan_ID = ? "
-			+ "and hr_concept_category_id = 1000001";
-		amt = DB.getSQLValueBD(get_TrxName(), sql, this.getHR_Loan_ID());
+		sql = "select NVL(sum(amount) * -1 , 0)  from HR_LoanFourtyPresent where hr_loan_ID = ? "
+			+ "and hr_concept_category_id = ?";
+		amt = DB.getSQLValueBD(get_TrxName(), sql, this.getHR_Loan_ID() , HardCodedVal.hr_concept_category_idDeduction);
 		
 		loan.setTotalDeduction(amt);
 		
@@ -49,7 +49,7 @@ public class MHRLoanFourtyPresent extends X_HR_LoanFourtyPresent{
 			"HR_LoanFourtyPresent.hr_movement_id = hr_movement.hr_movement_id  where hr_loan_id = ? " + 
 			"and hr_movement.hr_concept_category_id =  ?";
 		
-		amt = DB.getSQLValueBD(get_TrxName(), sql, this.getHR_Loan_ID() , 1000000);
+		amt = DB.getSQLValueBD(get_TrxName(), sql, this.getHR_Loan_ID() , HardCodedVal.hr_concept_category_idEarning);
 		
 		loan.setTotalEarnings(amt);
 		

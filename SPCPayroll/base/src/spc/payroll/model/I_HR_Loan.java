@@ -285,6 +285,15 @@ public interface I_HR_Loan
 	/** Get LoanAmount	  */
 	public BigDecimal getLoanAmount();
 
+    /** Column name LoanInstallment */
+    public static final String COLUMNNAME_LoanInstallment = "LoanInstallment";
+
+	/** Set Loan Installment	  */
+	public void setLoanInstallment (BigDecimal LoanInstallment);
+
+	/** Get Loan Installment	  */
+	public BigDecimal getLoanInstallment();
+
     /** Column name LoanType */
     public static final String COLUMNNAME_LoanType = "LoanType";
 

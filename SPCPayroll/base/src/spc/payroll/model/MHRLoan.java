@@ -22,9 +22,12 @@ import org.compiere.process.DocOptions;
 import org.compiere.process.DocumentEngine;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Trx;
 import org.eevolution.model.MHRAttribute;
 import org.eevolution.model.MHRConcept;
 import org.eevolution.model.MHRMovement;
+
+import com.sun.corba.ee.impl.orbutil.fsm.GuardedAction;
 
 @SuppressWarnings("serial")
 public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
@@ -139,9 +142,12 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 		if(this.getInstallmentCount() == 0)
 			throw new AdempiereException("Process Terminated! Zero Installment count");
 		
+		Trx trx = Trx.get(Trx.createTrxName(), true);
+		trx.start();
+		
 		//delete existing records
 		String sql = "DELETE FROM HR_LOANSCHEDULE WHERE HR_Loan_ID = ? ";
-		DB.executeUpdate(sql, this.get_ID(), this.get_TrxName());
+		DB.executeUpdate(sql, this.get_ID(), trx.getTrxName());
 		
 		int installmentCount = this.getInstallmentCount();
 		MHRLoanSchedule sc = null;
@@ -162,7 +168,7 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 		
 		for(int i = 0;i < installmentCount;i++){
 			
-			sc = new MHRLoanSchedule(p_ctx, 0, this.get_TrxName());
+			sc = new MHRLoanSchedule(p_ctx, 0, trx.getTrxName());
 			
 			sc.setCapitalAmt(new BigDecimal(monthCapital).setScale(0, RoundingMode.HALF_UP));
 			sc.setInterestAmt(new BigDecimal(interest).setScale(2, RoundingMode.HALF_UP));
@@ -175,6 +181,8 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 	        sc.save();
 		}
 		
+		trx.commit(); //do not delete
+		
 		//less the total capitle amount difference from last schedule line
 		sql = "SELECT LOANAMOUNT - (SELECT SUM(CAPITALAMT) FROM HR_LoanSchedule WHERE HR_Loan_ID=?) FROM HR_Loan WHERE HR_Loan_ID=?";
 		BigDecimal diff = DB.getSQLValueBD(get_TrxName(), sql, get_ID() , get_ID());
@@ -182,15 +190,30 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 		sc.save();
 		
 		//calculate 40 Present payment feasible range based on the last payroll
-		this.createFourtyPresentLines();
+		this.createFourtyPresentLines(trx);
 		
+		//this.set loan installemet value
+		this.setLoanInstallment(sc.getCapitalAmt().add(sc.getInterestAmt().subtract(diff)));
 		
+		//40 present validation
+		setIsValid(getLoanInstallment().doubleValue() <= (getFourtyPresent().doubleValue() - getTotalDeduction().doubleValue()));
+	
+		if(!isValid())
+			//there can be loans which is not validated the 40 %
+			setIsValid(getFourtyPresent().doubleValue() == 0.00);
+		
+		//this.save();
+		
+		trx.commit();trx.close();
+		
+		if(!isValid()) {
+			throw new AdempiereException("LOAN PROCESS STOPED! 40 present validation failed!");
+		}
 		
 		this.setDocStatus("IP");
 		this.save();
 	
-//		return "Line Created : " + installmentCount;
-		return "Line Created : " + 1;
+		return "Completed!";
 	}
 
 	@Override
@@ -244,6 +267,9 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 		//set capitle atribute
 		setHR_Attribute_ID(atribute.get_ID());
 		setGrantedDate(new Timestamp(System.currentTimeMillis()));
+		
+		String sql = "update HR_LoanGurantee set processed = 'Y' where hr_loan_id = ?";
+		DB.executeUpdate(sql, get_ID(), get_TrxName());
 		
 		return null;
 	}
@@ -453,34 +479,36 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 		}
 	}
 	
-	private void createFourtyPresentLines() {
+	private void createFourtyPresentLines(Trx trx) {
 
+		
 		//delete all lines before prepare
 		String sql = "delete from HR_LoanFourtyPresent where HR_Loan_ID = ?";
-		DB.executeUpdate(sql, get_ID(), get_TrxName());
+		DB.executeUpdate(sql, get_ID(), trx.getTrxName());
 		
- 		sql = "select hr_process_id from  HR_Process "
-			+ " where c_bpartner_id = ? "
-			+ " and docstatus IN ('CO' , 'CL') fetch first 1 rows only";
+ 		sql = "select p.hr_process_id from  HR_Process p " + 
+			"inner join HR_Movement m on p.hr_process_id = m.hr_process_id " + 
+			"where m.c_bpartner_id = ?  and p.docstatus IN ('CO' , 'CL') fetch first 1 rows only";
 		
-		int latsHrProcessId = DB.getSQLValue(get_TrxName(), sql, this.getC_BPartner_ID());
+		int latsHrProcessId = DB.getSQLValue(trx.getTrxName(), sql, this.getC_BPartner_ID());
 		
 		if(latsHrProcessId == -1)
 			throw new AdempiereException("No previous payroll movements found - 40 present validation failed");
 		
+		//this has done only based on the payrolll movement
 		sql = "select p.hr_process_id,bp.name,m.hr_concept_id, " + 
-			" (case when m.hr_concept_category_id = 1000000 " + 
-			" then m.amount when m.hr_concept_category_id = 1000001 then m.amount * -1 end) * f.percentage /100  as amount " + 
+			" (case when m.hr_concept_category_id = ? " + 
+			" then m.amount * -1 when m.hr_concept_category_id = ? then m.amount end) * f.percentage /100  as amount " + 
 			" ,m.hr_movement_id , m.hr_concept_category_id , " + 
-			" (case when m.hr_concept_category_id = 1000000 then  con.name " +
-			" when m.hr_concept_category_id = 1000001 then con.name || ' - ' ||m.amount  end) as conceptname, " +
+			" (case when m.hr_concept_category_id = ? then  con.name " +
+			" when m.hr_concept_category_id = ? then con.name || ' - ' ||m.amount  end) as conceptname, " +
 			" m.hr_movement_id " + 
 			" from HR_Process p " + 
 			" inner join HR_Movement m on p.hr_process_id = m.hr_process_id " + 
 			" inner join c_bpartner bp on bp.c_bpartner_id = m.c_bpartner_id " + 
 			" inner join HR_LoanTypeFactors f on f.hr_concept_id = m.hr_concept_id " +
 			" inner join hr_concept con on con.hr_concept_id = m.hr_concept_id " + 
-			" where p.c_bpartner_ID=? " + 
+			" where m.c_bpartner_ID=? " + 
 			" and f.hr_loantype_id = ? and f.isactive = 'Y' " + 
 			" and  p.hr_process_id = ? " + 
 			" and m.hr_movement_id not in " + 
@@ -493,26 +521,25 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 			" and l.docstatus = 'CL') " + 
 			" order by m.hr_concept_category_id , m.amount desc ";
 		
-		/*System.out.println(sql);
-		System.out.println(" this.getC_BPartner_ID() " + this.getC_BPartner_ID());
-		System.out.println(" getHR_LoanType_ID() " + getHR_LoanType_ID());
-		System.out.println(" latsHrProcessId " + latsHrProcessId);*/
+		PreparedStatement ps = null;ResultSet rs = null;
+		MHRLoanFourtyPresent lfp = null;
+		int seqNo = 10;
 		
 		try {
+			ps = DB.prepareStatement(sql, trx.getTrxName());
 			
-			PreparedStatement ps = null;ResultSet rs = null;
+			ps.setInt(1, HardCodedVal.hr_concept_category_idDeduction);
+			ps.setInt(2, HardCodedVal.hr_concept_category_idEarning);
+			ps.setInt(3, HardCodedVal.hr_concept_category_idDeduction);
+			ps.setInt(4, HardCodedVal.hr_concept_category_idEarning);
 			
-			ps = DB.prepareStatement(sql, get_TrxName());
-			ps.setInt(1, this.getC_BPartner_ID());
-			ps.setInt(2, getHR_LoanType_ID());
-			ps.setInt(3, latsHrProcessId);
-			ps.setInt(4, latsHrProcessId);
-			ps.setInt(5, latsHrProcessId);
+			ps.setInt(5, this.getC_BPartner_ID());
+			ps.setInt(6, getHR_LoanType_ID());
+			ps.setInt(7, latsHrProcessId);
+			ps.setInt(8, latsHrProcessId);
+			ps.setInt(9, latsHrProcessId);
 			
  			rs = ps.executeQuery();
- 			
- 			MHRLoanFourtyPresent lfp = null;
- 			int seqNo = 10;
  			
  			while(rs.next()) {
  				
@@ -523,15 +550,42 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
  				lfp.setHR_Loan_ID(get_ID());
  				lfp.setSeqNo(seqNo);
  				lfp.setHR_Movement_ID(rs.getInt("hr_movement_id"));
- 				lfp.save();
+ 				lfp.save(trx.getTrxName());
  				
  				seqNo+=10;
  			}
+		
+			//based on loan gurantee :: validate loan applicant signed for any loan and 40 present include 
+			//50% of loan installment
 			
-		}catch(Exception ex) {
-			ex.printStackTrace();
-//			ADialog.error(0, null, ex.getMessage());
-		}
+			sql = "select lt.name as loantype , bp.name as signedto, l.loaninstallment *-.5 as amount , l.documentno  from HR_LoanGurantee g " + 
+				" inner join hr_loan l on g.hr_loan_id = l.hr_loan_id " + 
+				" inner join c_bpartner bp on l.c_bpartner_id = bp.c_bpartner_id " + 
+				" inner join hr_loantype lt on l.hr_loantype_id = lt.hr_loantype_id " + 
+				" where g.c_bpartner_id = ? " + 
+				" and l.docstatus = 'CO'";
+			
+			ps = DB.prepareStatement(sql, trx.getTrxName());
+			ps.setInt(1, this.getC_BPartner_ID());
+			
+			rs = ps.executeQuery();
+				
+			while(rs.next()) {
+				
+				lfp = new MHRLoanFourtyPresent(p_ctx, 0, get_TrxName());
+				lfp.setName("Loan Guarantee : Loan Doc No - " + rs.getString("documentno"));
+				lfp.setAmount(rs.getBigDecimal("amount"));
+				lfp.setHR_Concept_Category_ID(HardCodedVal.hr_concept_category_idDeduction);
+				lfp.setHR_Loan_ID(get_ID());
+				lfp.setSeqNo(seqNo);
+				lfp.setHR_Movement_ID(-1);
+				lfp.save(trx.getTrxName());
+				
+				seqNo+=10;
+			}
+		
+		}catch(Exception ex) { throw new AdempiereException(ex.getMessage());}
+		
 		
 	}
 	

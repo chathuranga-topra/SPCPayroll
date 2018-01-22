@@ -33,7 +33,7 @@ public class X_HR_Loan extends PO implements I_HR_Loan, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20180420L;
+	private static final long serialVersionUID = 20180422L;
 
     /** Standard Constructor */
     public X_HR_Loan (Properties ctx, int HR_Loan_ID, String trxName)
@@ -268,8 +268,7 @@ public class X_HR_Loan extends PO implements I_HR_Loan, I_Persistent
 		@param FPBalance FP Balance	  */
 	public void setFPBalance (BigDecimal FPBalance)
 	{
-		set_Value (COLUMNNAME_FPBalance, FPBalance);
-	}
+		throw new IllegalArgumentException ("FPBalance is virtual column");	}
 
 	/** Get FP Balance.
 		@return FP Balance	  */
@@ -463,6 +462,23 @@ public class X_HR_Loan extends PO implements I_HR_Loan, I_Persistent
 	public BigDecimal getLoanAmount () 
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_LoanAmount);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Loan Installment.
+		@param LoanInstallment Loan Installment	  */
+	public void setLoanInstallment (BigDecimal LoanInstallment)
+	{
+		set_Value (COLUMNNAME_LoanInstallment, LoanInstallment);
+	}
+
+	/** Get Loan Installment.
+		@return Loan Installment	  */
+	public BigDecimal getLoanInstallment () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_LoanInstallment);
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;
