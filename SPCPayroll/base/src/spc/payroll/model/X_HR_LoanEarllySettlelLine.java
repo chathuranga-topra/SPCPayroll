@@ -24,33 +24,35 @@ import java.util.Properties;
 import org.compiere.model.*;
 import org.compiere.util.Env;
 
-/** Generated Model for HR_LoanSchedule
+/** Generated Model for HR_LoanEarllySettlelLine
  *  @author Adempiere (generated) 
  *  @version Release 3.8.0 - $Id$ */
-public class X_HR_LoanSchedule extends PO implements I_HR_LoanSchedule, I_Persistent 
+public class X_HR_LoanEarllySettlelLine extends PO implements I_HR_LoanEarllySettlelLine, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20180410L;
+	private static final long serialVersionUID = 20180404L;
 
     /** Standard Constructor */
-    public X_HR_LoanSchedule (Properties ctx, int HR_LoanSchedule_ID, String trxName)
+    public X_HR_LoanEarllySettlelLine (Properties ctx, int HR_LoanEarllySettlelLine_ID, String trxName)
     {
-      super (ctx, HR_LoanSchedule_ID, trxName);
-      /** if (HR_LoanSchedule_ID == 0)
+      super (ctx, HR_LoanEarllySettlelLine_ID, trxName);
+      /** if (HR_LoanEarllySettlelLine_ID == 0)
         {
 			setCapitalAmt (Env.ZERO);
 			setEffectiveFrom (new Timestamp( System.currentTimeMillis() ));
-			setHR_LoanSchedule_ID (0);
-			setHR_Loan_ID (0);
-			setInterestAmt (Env.ZERO);
+			setHR_LoanEarllySettlelLine_ID (0);
+			setOriginalInterest (Env.ZERO);
+			setRemainingDays (0);
+			setRevisedInterest (Env.ZERO);
+			setSeqNo (0);
         } */
     }
 
     /** Load Constructor */
-    public X_HR_LoanSchedule (Properties ctx, ResultSet rs, String trxName)
+    public X_HR_LoanEarllySettlelLine (Properties ctx, ResultSet rs, String trxName)
     {
       super (ctx, rs, trxName);
     }
@@ -72,7 +74,7 @@ public class X_HR_LoanSchedule extends PO implements I_HR_LoanSchedule, I_Persis
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_HR_LoanSchedule[")
+      StringBuffer sb = new StringBuffer ("X_HR_LoanEarllySettlelLine[")
         .append(get_ID()).append("]");
       return sb.toString();
     }
@@ -108,11 +110,6 @@ public class X_HR_LoanSchedule extends PO implements I_HR_LoanSchedule, I_Persis
 		return (Timestamp)get_Value(COLUMNNAME_EffectiveFrom);
 	}
 
-	public spc.payroll.model.I_HR_LoanEarllySettle getHR_LoanEarllySettle() throws RuntimeException
-    {
-		return (spc.payroll.model.I_HR_LoanEarllySettle)MTable.get(getCtx(), spc.payroll.model.I_HR_LoanEarllySettle.Table_Name)
-			.getPO(getHR_LoanEarllySettle_ID(), get_TrxName());	}
-
 	/** Set Earlly Settlement.
 		@param HR_LoanEarllySettle_ID Earlly Settlement	  */
 	public void setHR_LoanEarllySettle_ID (int HR_LoanEarllySettle_ID)
@@ -133,133 +130,41 @@ public class X_HR_LoanSchedule extends PO implements I_HR_LoanSchedule, I_Persis
 		return ii.intValue();
 	}
 
-	/** Set HR_LoanSchedule ID.
-		@param HR_LoanSchedule_ID HR_LoanSchedule ID	  */
-	public void setHR_LoanSchedule_ID (int HR_LoanSchedule_ID)
+	/** Set HR_LoanEarllySettlelLine ID.
+		@param HR_LoanEarllySettlelLine_ID HR_LoanEarllySettlelLine ID	  */
+	public void setHR_LoanEarllySettlelLine_ID (int HR_LoanEarllySettlelLine_ID)
 	{
-		if (HR_LoanSchedule_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_HR_LoanSchedule_ID, null);
+		if (HR_LoanEarllySettlelLine_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_HR_LoanEarllySettlelLine_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_HR_LoanSchedule_ID, Integer.valueOf(HR_LoanSchedule_ID));
+			set_ValueNoCheck (COLUMNNAME_HR_LoanEarllySettlelLine_ID, Integer.valueOf(HR_LoanEarllySettlelLine_ID));
 	}
 
-	/** Get HR_LoanSchedule ID.
-		@return HR_LoanSchedule ID	  */
-	public int getHR_LoanSchedule_ID () 
+	/** Get HR_LoanEarllySettlelLine ID.
+		@return HR_LoanEarllySettlelLine ID	  */
+	public int getHR_LoanEarllySettlelLine_ID () 
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_HR_LoanSchedule_ID);
+		Integer ii = (Integer)get_Value(COLUMNNAME_HR_LoanEarllySettlelLine_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
 	}
 
-	/** Set HR_Loan ID.
-		@param HR_Loan_ID HR_Loan ID	  */
-	public void setHR_Loan_ID (int HR_Loan_ID)
+	/** Set Original Interest.
+		@param OriginalInterest Original Interest	  */
+	public void setOriginalInterest (BigDecimal OriginalInterest)
 	{
-		if (HR_Loan_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_HR_Loan_ID, null);
-		else 
-			set_ValueNoCheck (COLUMNNAME_HR_Loan_ID, Integer.valueOf(HR_Loan_ID));
+		set_Value (COLUMNNAME_OriginalInterest, OriginalInterest);
 	}
 
-	/** Get HR_Loan ID.
-		@return HR_Loan ID	  */
-	public int getHR_Loan_ID () 
+	/** Get Original Interest.
+		@return Original Interest	  */
+	public BigDecimal getOriginalInterest () 
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_HR_Loan_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	public org.eevolution.model.I_HR_Movement getHR_Movement() throws RuntimeException
-    {
-		return (org.eevolution.model.I_HR_Movement)MTable.get(getCtx(), org.eevolution.model.I_HR_Movement.Table_Name)
-			.getPO(getHR_Movement_ID(), get_TrxName());	}
-
-	/** Set Payroll Movement.
-		@param HR_Movement_ID Payroll Movement	  */
-	public void setHR_Movement_ID (int HR_Movement_ID)
-	{
-		if (HR_Movement_ID < 1) 
-			set_Value (COLUMNNAME_HR_Movement_ID, null);
-		else 
-			set_Value (COLUMNNAME_HR_Movement_ID, Integer.valueOf(HR_Movement_ID));
-	}
-
-	/** Get Payroll Movement.
-		@return Payroll Movement	  */
-	public int getHR_Movement_ID () 
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_HR_Movement_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	/** Set Interest Amount.
-		@param InterestAmt 
-		Interest Amount
-	  */
-	public void setInterestAmt (BigDecimal InterestAmt)
-	{
-		set_Value (COLUMNNAME_InterestAmt, InterestAmt);
-	}
-
-	/** Get Interest Amount.
-		@return Interest Amount
-	  */
-	public BigDecimal getInterestAmt () 
-	{
-		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_InterestAmt);
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_OriginalInterest);
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;
-	}
-
-	/** Set Interest Movement.
-		@param InterestMovement_ID Interest Movement	  */
-	public void setInterestMovement_ID (int InterestMovement_ID)
-	{
-		if (InterestMovement_ID < 1) 
-			set_Value (COLUMNNAME_InterestMovement_ID, null);
-		else 
-			set_Value (COLUMNNAME_InterestMovement_ID, Integer.valueOf(InterestMovement_ID));
-	}
-
-	/** Get Interest Movement.
-		@return Interest Movement	  */
-	public int getInterestMovement_ID () 
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_InterestMovement_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	/** Set Paid.
-		@param IsPaid 
-		The document is paid
-	  */
-	public void setIsPaid (boolean IsPaid)
-	{
-		set_Value (COLUMNNAME_IsPaid, Boolean.valueOf(IsPaid));
-	}
-
-	/** Get Paid.
-		@return The document is paid
-	  */
-	public boolean isPaid () 
-	{
-		Object oo = get_Value(COLUMNNAME_IsPaid);
-		if (oo != null) 
-		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
-			return "Y".equals(oo);
-		}
-		return false;
 	}
 
 	/** Set Processed.
@@ -284,6 +189,40 @@ public class X_HR_LoanSchedule extends PO implements I_HR_LoanSchedule, I_Persis
 			return "Y".equals(oo);
 		}
 		return false;
+	}
+
+	/** Set Remaining Days.
+		@param RemainingDays Remaining Days	  */
+	public void setRemainingDays (int RemainingDays)
+	{
+		set_Value (COLUMNNAME_RemainingDays, Integer.valueOf(RemainingDays));
+	}
+
+	/** Get Remaining Days.
+		@return Remaining Days	  */
+	public int getRemainingDays () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_RemainingDays);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Revised Interest.
+		@param RevisedInterest Revised Interest	  */
+	public void setRevisedInterest (BigDecimal RevisedInterest)
+	{
+		set_Value (COLUMNNAME_RevisedInterest, RevisedInterest);
+	}
+
+	/** Get Revised Interest.
+		@return Revised Interest	  */
+	public BigDecimal getRevisedInterest () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_RevisedInterest);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
 	}
 
 	/** Set Sequence.

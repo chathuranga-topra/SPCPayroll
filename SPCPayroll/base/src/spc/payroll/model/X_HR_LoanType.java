@@ -32,7 +32,7 @@ public class X_HR_LoanType extends PO implements I_HR_LoanType, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20180320L;
+	private static final long serialVersionUID = 20180410L;
 
     /** Standard Constructor */
     public X_HR_LoanType (Properties ctx, int HR_LoanType_ID, String trxName)
@@ -157,6 +157,31 @@ public class X_HR_LoanType extends PO implements I_HR_LoanType, I_Persistent
 	public int getInstallmentCount () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_InstallmentCount);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.eevolution.model.I_HR_Concept getInterestConcept() throws RuntimeException
+    {
+		return (org.eevolution.model.I_HR_Concept)MTable.get(getCtx(), org.eevolution.model.I_HR_Concept.Table_Name)
+			.getPO(getInterestConcept_ID(), get_TrxName());	}
+
+	/** Set Interest Concept.
+		@param InterestConcept_ID Interest Concept	  */
+	public void setInterestConcept_ID (int InterestConcept_ID)
+	{
+		if (InterestConcept_ID < 1) 
+			set_Value (COLUMNNAME_InterestConcept_ID, null);
+		else 
+			set_Value (COLUMNNAME_InterestConcept_ID, Integer.valueOf(InterestConcept_ID));
+	}
+
+	/** Get Interest Concept.
+		@return Interest Concept	  */
+	public int getInterestConcept_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_InterestConcept_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

@@ -63,6 +63,19 @@ public interface I_HR_Loan
 	  */
 	public int getAD_Org_ID();
 
+    /** Column name BPValue */
+    public static final String COLUMNNAME_BPValue = "BPValue";
+
+	/** Set BP Search Key.
+	  * Business Partner Key Value
+	  */
+	public void setBPValue (String BPValue);
+
+	/** Get BP Search Key.
+	  * Business Partner Key Value
+	  */
+	public String getBPValue();
+
     /** Column name Balance */
     public static final String COLUMNNAME_Balance = "Balance";
 
@@ -164,6 +177,21 @@ public interface I_HR_Loan
 	/** Get GrantedDate	  */
 	public Timestamp getGrantedDate();
 
+    /** Column name HR_Attribute_ID */
+    public static final String COLUMNNAME_HR_Attribute_ID = "HR_Attribute_ID";
+
+	/** Set Payroll Attribute.
+	  * Employee Attribute allows to add any metadata of type (text, date , quantity and amount ) of an Employee.
+	  */
+	public void setHR_Attribute_ID (int HR_Attribute_ID);
+
+	/** Get Payroll Attribute.
+	  * Employee Attribute allows to add any metadata of type (text, date , quantity and amount ) of an Employee.
+	  */
+	public int getHR_Attribute_ID();
+
+	public org.eevolution.model.I_HR_Attribute getHR_Attribute() throws RuntimeException;
+
     /** Column name HR_LoanType_ID */
     public static final String COLUMNNAME_HR_LoanType_ID = "HR_LoanType_ID";
 
@@ -193,6 +221,15 @@ public interface I_HR_Loan
 	/** Get Installment Count	  */
 	public int getInstallmentCount();
 
+    /** Column name InterestAttribute_ID */
+    public static final String COLUMNNAME_InterestAttribute_ID = "InterestAttribute_ID";
+
+	/** Set Interest Attribute	  */
+	public void setInterestAttribute_ID (int InterestAttribute_ID);
+
+	/** Get Interest Attribute	  */
+	public int getInterestAttribute_ID();
+
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
 
@@ -214,6 +251,24 @@ public interface I_HR_Loan
 
 	/** Get LoanAmount	  */
 	public BigDecimal getLoanAmount();
+
+    /** Column name LoanType */
+    public static final String COLUMNNAME_LoanType = "LoanType";
+
+	/** Set LoanType	  */
+	public void setLoanType (String LoanType);
+
+	/** Get LoanType	  */
+	public String getLoanType();
+
+    /** Column name PayrollEffectiveDate */
+    public static final String COLUMNNAME_PayrollEffectiveDate = "PayrollEffectiveDate";
+
+	/** Set PayrollEffectiveDate	  */
+	public void setPayrollEffectiveDate (Timestamp PayrollEffectiveDate);
+
+	/** Get PayrollEffectiveDate	  */
+	public Timestamp getPayrollEffectiveDate();
 
     /** Column name Processed */
     public static final String COLUMNNAME_Processed = "Processed";

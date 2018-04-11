@@ -158,10 +158,10 @@ public interface I_HR_LoanEarllySettle
     /** Column name HR_LoanEarllySettle_ID */
     public static final String COLUMNNAME_HR_LoanEarllySettle_ID = "HR_LoanEarllySettle_ID";
 
-	/** Set HR_LoanEarllySettle ID	  */
+	/** Set Earlly Settlement	  */
 	public void setHR_LoanEarllySettle_ID (int HR_LoanEarllySettle_ID);
 
-	/** Get HR_LoanEarllySettle ID	  */
+	/** Get Earlly Settlement	  */
 	public int getHR_LoanEarllySettle_ID();
 
     /** Column name HR_Loan_ID */
@@ -188,6 +188,37 @@ public interface I_HR_LoanEarllySettle
 	  */
 	public boolean isActive();
 
+    /** Column name NewInterestTotal */
+    public static final String COLUMNNAME_NewInterestTotal = "NewInterestTotal";
+
+	/** Set New Interest Total	  */
+	public void setNewInterestTotal (BigDecimal NewInterestTotal);
+
+	/** Get New Interest Total	  */
+	public BigDecimal getNewInterestTotal();
+
+    /** Column name OldInterestTotal */
+    public static final String COLUMNNAME_OldInterestTotal = "OldInterestTotal";
+
+	/** Set Old Interest Total	  */
+	public void setOldInterestTotal (BigDecimal OldInterestTotal);
+
+	/** Get Old Interest Total	  */
+	public BigDecimal getOldInterestTotal();
+
+    /** Column name PaymentDocumentNo */
+    public static final String COLUMNNAME_PaymentDocumentNo = "PaymentDocumentNo";
+
+	/** Set Payment Document No.
+	  * Document number of the Payment
+	  */
+	public void setPaymentDocumentNo (String PaymentDocumentNo);
+
+	/** Get Payment Document No.
+	  * Document number of the Payment
+	  */
+	public String getPaymentDocumentNo();
+
     /** Column name Processed */
     public static final String COLUMNNAME_Processed = "Processed";
 
@@ -200,6 +231,15 @@ public interface I_HR_LoanEarllySettle
 	  * The document has been processed
 	  */
 	public boolean isProcessed();
+
+    /** Column name RemainingDays */
+    public static final String COLUMNNAME_RemainingDays = "RemainingDays";
+
+	/** Set Remaining Days	  */
+	public void setRemainingDays (int RemainingDays);
+
+	/** Get Remaining Days	  */
+	public int getRemainingDays();
 
     /** Column name SettleDate */
     public static final String COLUMNNAME_SettleDate = "SettleDate";

@@ -21,17 +21,17 @@ import java.sql.Timestamp;
 import org.compiere.model.*;
 import org.compiere.util.KeyNamePair;
 
-/** Generated Interface for HR_LoanSchedule
+/** Generated Interface for HR_LoanTypeFactors
  *  @author Adempiere (generated) 
  *  @version Release 3.8.0
  */
-public interface I_HR_LoanSchedule 
+public interface I_HR_LoanTypeFactors 
 {
 
-    /** TableName=HR_LoanSchedule */
-    public static final String Table_Name = "HR_LoanSchedule";
+    /** TableName=HR_LoanTypeFactors */
+    public static final String Table_Name = "HR_LoanTypeFactors";
 
-    /** AD_Table_ID=1000010 */
+    /** AD_Table_ID=1000022 */
     public static final int Table_ID = MTable.getTable_ID(Table_Name);
 
     KeyNamePair Model = new KeyNamePair(Table_ID, Table_Name);
@@ -63,15 +63,6 @@ public interface I_HR_LoanSchedule
 	  */
 	public int getAD_Org_ID();
 
-    /** Column name CapitalAmt */
-    public static final String COLUMNNAME_CapitalAmt = "CapitalAmt";
-
-	/** Set Capital Amount	  */
-	public void setCapitalAmt (BigDecimal CapitalAmt);
-
-	/** Get Capital Amount	  */
-	public BigDecimal getCapitalAmt();
-
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
 
@@ -88,76 +79,53 @@ public interface I_HR_LoanSchedule
 	  */
 	public int getCreatedBy();
 
-    /** Column name EffectiveFrom */
-    public static final String COLUMNNAME_EffectiveFrom = "EffectiveFrom";
+    /** Column name HR_Concept_Category_ID */
+    public static final String COLUMNNAME_HR_Concept_Category_ID = "HR_Concept_Category_ID";
 
-	/** Set EffectiveFrom	  */
-	public void setEffectiveFrom (Timestamp EffectiveFrom);
-
-	/** Get EffectiveFrom	  */
-	public Timestamp getEffectiveFrom();
-
-    /** Column name HR_LoanEarllySettle_ID */
-    public static final String COLUMNNAME_HR_LoanEarllySettle_ID = "HR_LoanEarllySettle_ID";
-
-	/** Set Earlly Settlement	  */
-	public void setHR_LoanEarllySettle_ID (int HR_LoanEarllySettle_ID);
-
-	/** Get Earlly Settlement	  */
-	public int getHR_LoanEarllySettle_ID();
-
-	public spc.payroll.model.I_HR_LoanEarllySettle getHR_LoanEarllySettle() throws RuntimeException;
-
-    /** Column name HR_LoanSchedule_ID */
-    public static final String COLUMNNAME_HR_LoanSchedule_ID = "HR_LoanSchedule_ID";
-
-	/** Set HR_LoanSchedule ID	  */
-	public void setHR_LoanSchedule_ID (int HR_LoanSchedule_ID);
-
-	/** Get HR_LoanSchedule ID	  */
-	public int getHR_LoanSchedule_ID();
-
-    /** Column name HR_Loan_ID */
-    public static final String COLUMNNAME_HR_Loan_ID = "HR_Loan_ID";
-
-	/** Set HR_Loan ID	  */
-	public void setHR_Loan_ID (int HR_Loan_ID);
-
-	/** Get HR_Loan ID	  */
-	public int getHR_Loan_ID();
-
-    /** Column name HR_Movement_ID */
-    public static final String COLUMNNAME_HR_Movement_ID = "HR_Movement_ID";
-
-	/** Set Payroll Movement	  */
-	public void setHR_Movement_ID (int HR_Movement_ID);
-
-	/** Get Payroll Movement	  */
-	public int getHR_Movement_ID();
-
-	public org.eevolution.model.I_HR_Movement getHR_Movement() throws RuntimeException;
-
-    /** Column name InterestAmt */
-    public static final String COLUMNNAME_InterestAmt = "InterestAmt";
-
-	/** Set Interest Amount.
-	  * Interest Amount
+	/** Set Concept Category.
+	  * Global Payroll Concept Category allows to grouping of Global Concept to reports and queries
 	  */
-	public void setInterestAmt (BigDecimal InterestAmt);
+	public void setHR_Concept_Category_ID (int HR_Concept_Category_ID);
 
-	/** Get Interest Amount.
-	  * Interest Amount
+	/** Get Concept Category.
+	  * Global Payroll Concept Category allows to grouping of Global Concept to reports and queries
 	  */
-	public BigDecimal getInterestAmt();
+	public int getHR_Concept_Category_ID();
 
-    /** Column name InterestMovement_ID */
-    public static final String COLUMNNAME_InterestMovement_ID = "InterestMovement_ID";
+	public org.eevolution.model.I_HR_Concept_Category getHR_Concept_Category() throws RuntimeException;
 
-	/** Set Interest Movement	  */
-	public void setInterestMovement_ID (int InterestMovement_ID);
+    /** Column name HR_Concept_ID */
+    public static final String COLUMNNAME_HR_Concept_ID = "HR_Concept_ID";
 
-	/** Get Interest Movement	  */
-	public int getInterestMovement_ID();
+	/** Set Payroll Concept.
+	  * The Payroll Concept allows to define all the perception and deductions elements needed to define a payroll.
+	  */
+	public void setHR_Concept_ID (int HR_Concept_ID);
+
+	/** Get Payroll Concept.
+	  * The Payroll Concept allows to define all the perception and deductions elements needed to define a payroll.
+	  */
+	public int getHR_Concept_ID();
+
+	public org.eevolution.model.I_HR_Concept getHR_Concept() throws RuntimeException;
+
+    /** Column name HR_LoanTypeFactors_ID */
+    public static final String COLUMNNAME_HR_LoanTypeFactors_ID = "HR_LoanTypeFactors_ID";
+
+	/** Set HR_LoanTypeFactors ID	  */
+	public void setHR_LoanTypeFactors_ID (int HR_LoanTypeFactors_ID);
+
+	/** Get HR_LoanTypeFactors ID	  */
+	public int getHR_LoanTypeFactors_ID();
+
+    /** Column name HR_LoanType_ID */
+    public static final String COLUMNNAME_HR_LoanType_ID = "HR_LoanType_ID";
+
+	/** Set LoanType	  */
+	public void setHR_LoanType_ID (int HR_LoanType_ID);
+
+	/** Get LoanType	  */
+	public int getHR_LoanType_ID();
 
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
@@ -172,31 +140,18 @@ public interface I_HR_LoanSchedule
 	  */
 	public boolean isActive();
 
-    /** Column name IsPaid */
-    public static final String COLUMNNAME_IsPaid = "IsPaid";
+    /** Column name Remarks */
+    public static final String COLUMNNAME_Remarks = "Remarks";
 
-	/** Set Paid.
-	  * The document is paid
+	/** Set Remarks.
+	  * Remarks
 	  */
-	public void setIsPaid (boolean IsPaid);
+	public void setRemarks (String Remarks);
 
-	/** Get Paid.
-	  * The document is paid
+	/** Get Remarks.
+	  * Remarks
 	  */
-	public boolean isPaid();
-
-    /** Column name Processed */
-    public static final String COLUMNNAME_Processed = "Processed";
-
-	/** Set Processed.
-	  * The document has been processed
-	  */
-	public void setProcessed (boolean Processed);
-
-	/** Get Processed.
-	  * The document has been processed
-	  */
-	public boolean isProcessed();
+	public String getRemarks();
 
     /** Column name SeqNo */
     public static final String COLUMNNAME_SeqNo = "SeqNo";

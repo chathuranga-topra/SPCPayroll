@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Properties;
 
 import org.adempiere.exceptions.AdempiereException;
+import org.compiere.apps.ADialog;
 import org.compiere.model.MBPartner;
 import org.compiere.model.MClient;
 import org.compiere.model.MCurrency;
@@ -961,31 +962,46 @@ public class MHRProcess extends X_HR_Process implements DocAction
 				}
 			}
 			
+			MHRMovement cap;MHRMovement inte;
 			//validate for available loans
 			MHRLoan loans [] = MHRLoan.getLoans(p_ctx, bp.get_ID(), this.get_TrxName());
 			for(MHRLoan loan : loans){
 				MHRLoanSchedule schdl = MHRLoan.getDuePaymentSc(p_ctx, this.getDateAcct(), loan.get_ID(), this.get_TrxName());
 				if(schdl != null){
 					
-					//create payroll movement
-					MHRMovement movement = createMovementFromConcept((MHRConcept)loan.getHR_LoanType().getHR_Concept(), true);
-					movement.setHR_Concept_ID(loan.getHR_LoanType().getHR_Concept_ID());
-					movement.setHR_Payroll_ID(this.getHR_Payroll_ID());
-					//movement.setHR_PayrollConcept_ID(loan.getHR_LoanType().getHR_Concept_ID());
-					movement.setAmount(schdl.getCapitalAmt().add(schdl.getInterestAmt()));
-					movement.save();
+					cap = createMovementFromConcept((MHRConcept)loan.getHR_LoanType().getHR_Concept(), true);
+					cap.setHR_Concept_ID(loan.getHR_LoanType().getHR_Concept_ID());
+					cap.setHR_Payroll_ID(this.getHR_Payroll_ID());
 					
+					//capital and interest for two movement
+					if(loan.getHR_LoanType().getInterestConcept_ID() == 0){ //no separate concept both interest and capital ad to one concept
+						//create payroll movement
+						cap.setAmount(schdl.getCapitalAmt().add(schdl.getInterestAmt()));
+					}else{
+						cap.setAmount(schdl.getCapitalAmt());
+						inte = createMovementFromConcept((MHRConcept)loan.getHR_LoanType().getInterestConcept(), true);
+						inte.setHR_Concept_ID(loan.getHR_LoanType().getInterestConcept_ID());
+						inte.setHR_Payroll_ID(this.getHR_Payroll_ID());
+						inte.setAmount(schdl.getInterestAmt());
+						inte.save();
+						schdl.setInterestMovement_ID(inte.get_ID());
+					}
+					
+					cap.save();
 					schdl.setIsPaid(true);
-					schdl.setHR_Movement_ID(movement.get_ID());
+					schdl.setHR_Movement_ID(cap.get_ID());
 					schdl.setProcessed(true);
 					schdl.save();
 				}
 				//close the loan when it paid all installments
 				if(MHRLoan.getBalance(loan).compareTo(loan.getBalance()) == 0){
-					loan.setDocStatus("CL");
-					loan.setDocStatus("--");
-					loan.setProcessed(true);
-					loan.save();
+					
+					try{
+						loan.closeIt();
+					}catch(Exception ex){
+						ADialog.error(0, null, ex.getMessage());
+					}
+					
 				}
 			}
 			

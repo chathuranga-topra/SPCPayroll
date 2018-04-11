@@ -36,7 +36,27 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 		// TODO Auto-generated constructor stub
 	}
 	
-	protected boolean beforeSave(boolean newRecord){ 
+	protected boolean beforeSave(boolean newRecord){
+		
+		//validate duplicate loans opening
+		 int length = MHRLoan.getLoans(getCtx(), getC_BPartner_ID(), getHR_LoanType_ID(), " DOCSTATUS NOT IN('CL') AND "
+		 		+ "HR_LOAN_ID NOT IN ("+get_ID()+")", get_TrxName()).length;
+		 if(length >= 1)
+			 throw new AdempiereException("DUPLICATE LOAN DOCUMENT!Your are not allowed to open duplicate loans");
+				 
+		
+		//validation for fastival advance for current year opening more than one
+		if(this.getHR_LoanType_ID() == 1000006){ // loan type is hard corded
+			String sql = "SELECT NVL(CASE WHEN EXTRACT (YEAR FROM GRANTEDDATE) = EXTRACT (YEAR FROM CURRENT_DATE)THEN"
+			+ " CAST (DOCUMENTNO AS VARCHAR(12)) ELSE 'N' END , 'N') FROM HR_Loan WHERE C_BPartner_ID = ? "
+			+ " AND HR_LoanType_ID = ? AND HR_LOAN_ID NOT IN (?)"
+			+ " AND AD_Client_ID = ? ";
+			
+			String res = DB.getSQLValueString(get_TrxName(), sql, getC_BPartner_ID() , getHR_LoanType_ID() , get_ID() , getAD_Client_ID());
+			
+			if(!(res == null || res.equalsIgnoreCase("N")))
+				throw new AdempiereException("Duplicate advance! ~ Document No - " + res);
+		}
 		
 		//basic sallary :: concept is hard corded
 		MHRConcept basicSallaryConcept = new MHRConcept(getCtx(), 1000001, this.get_TrxName());
@@ -78,9 +98,13 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 			this.setInstallmentCount(loanType.getInstallmentCount());
 		}
 		
-		//Within 40% limit grant should be given (From basic+safety+travelling+cost of living 40% can be taken).
-		String sql = "SELECT * FRIIM";
+		//validate for interrest attribute with loan type interest attribute
+		if(getHR_LoanType().getInterestConcept_ID() == 0){ //no interest attribute
+			setInterestAttribute_ID(0);
+		}
 		
+		//Within 40% limit grant should be given (From basic+safety+travelling+cost of living 40% can be taken).
+		String sql = "SELECT * FROM";
 		
 		return true;
 	}
@@ -88,17 +112,14 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 	@Override
 	public boolean processIt(String action) throws Exception {
 		
-		if(action.equals("--") && getDocAction().equalsIgnoreCase("PR"))
+		if(action.equals("--") && getDocAction().equalsIgnoreCase("PR")&& getDocStatus().equals("DR"))
 			this.prepareIt();
-		else if(action.equals("PR") && getDocAction().equalsIgnoreCase("CO"))
+		else if(action.equals("CO") && getDocAction().equalsIgnoreCase("CO") && getDocStatus().equals("IP"))
 			this.completeIt();
-		else if(action.equals("--") && getDocAction().equalsIgnoreCase("CL"))
+		else if(action.equals("--") && getDocAction().equalsIgnoreCase("CL") && getDocStatus().equals("CO"))
 			this.closeIt();
 		else if(action.equals("--") && getDocAction().equalsIgnoreCase("VO"))
 			this.voidIt();
-		
-		System.out.println("action : " + action);
-		System.out.println("getDocAction() : " + getDocAction());
 		
 		return true;
 	}
@@ -116,6 +137,7 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 	}
 
 	//when preparing create loan schedule
+	@SuppressWarnings("deprecation")
 	@Override
 	public String prepareIt(){
 		
@@ -131,30 +153,33 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 		
 		int installmentCount = this.getInstallmentCount();
 		MHRLoanSchedule sc = null;
-		Date dateGranted = new Date(this.getGrantedDate().getTime());
+		Date dateGranted = new Date();
 		Calendar cal = Calendar.getInstance();
+		cal.setTime(dateGranted);
+		
+		//set loan payroll applicable date :: always next month 25 th
+		cal.add(Calendar.MONTH, 1);
+		Date d = new Date(cal.getTime().getTime());
+		d.setDate(1);
+		cal.setTime(d);
+		setPayrollEffectiveDate(new Timestamp(d.getTime()));
 		
 		BigDecimal ir = this.getHR_LoanType().getRate();
-		BigDecimal monthCapital = this.getLoanAmount().divide(new BigDecimal(installmentCount).setScale(2, RoundingMode.HALF_UP).setScale(2, RoundingMode.HALF_UP));
-		
-		//250000 *7/s100 *1/12*61/60*1/2 this is how interest is calculated
+		double monthCapital =  this.getLoanAmount().doubleValue() / installmentCount;
 		double interest = ((((this.getLoanAmount().doubleValue() * ir.doubleValue() / 100) * 1 / 12) * (installmentCount + 1) / installmentCount) * 1 / 2);
 		
 		for(int i = 0;i < installmentCount;i++){
-			sc = new MHRLoanSchedule(p_ctx, 0, this.get_TrxName());
 			
-			sc.setCapitalAmt(monthCapital);
+			sc = new MHRLoanSchedule(p_ctx, 0, this.get_TrxName());
+			sc.setCapitalAmt(new BigDecimal(monthCapital).setScale(2, RoundingMode.HALF_UP));
 			sc.setInterestAmt(new BigDecimal(interest).setScale(2, RoundingMode.HALF_UP));
 			sc.setHR_Loan_ID(this.get_ID());
 			sc.setSeqNo(i+1);
-			sc.isPaid();
 			//set effective date for loan premium applicable for
-			cal.setTime(dateGranted);
+			cal.setTime(d);
 	        cal.add(Calendar.MONTH, i);
 	        sc.setEffectiveFrom(new Timestamp(cal.getTime().getTime()));
-	        
 	        sc.save();
-		    
 		}
 		
 		this.setDocStatus("IP");
@@ -178,23 +203,64 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 	@Override
 	public String completeIt() {
 		
-		//create a comcept atribute for particulart employee
+		this.prepareIt();
+		
+		this.setGrantedDate(new Timestamp(System.currentTimeMillis()));
+		
+		//create a concept atribute for particulart employee
+		//If interest for separate concept
+		if(getHR_LoanType().getInterestConcept_ID() > 0){
+			MHRAttribute inte = new MHRAttribute(this.getCtx() , 0 , this.get_TrxName());
+			inte = new MHRAttribute(this.getCtx() , 0 , this.get_TrxName());
+			inte.setHR_Concept_ID(this.getHR_LoanType().getInterestConcept_ID());
+			inte.setValidFrom(this.getPayrollEffectiveDate());
+			inte.setC_BPartner_ID(this.getC_BPartner_ID());
+			inte.setColumnType(this.getHR_LoanType().getHR_Concept().getColumnType());
+			inte.set_ValueOfColumn("processed", "Y");
+			inte.save();
+			//set interest atribute
+			setInterestAttribute_ID(inte.get_ID());
+		}
+		
+		//capital
 		MHRAttribute atribute = new MHRAttribute(this.getCtx() , 0 , this.get_TrxName());
+		atribute = new MHRAttribute(this.getCtx() , 0 , this.get_TrxName());
 		atribute.setHR_Concept_ID(this.getHR_LoanType().getHR_Concept_ID());
-		atribute.setValidFrom(this.getGrantedDate());
+		atribute.setValidFrom(this.getPayrollEffectiveDate());
 		atribute.setC_BPartner_ID(this.getC_BPartner_ID());
 		atribute.setColumnType(this.getHR_LoanType().getHR_Concept().getColumnType());
+		atribute.set_ValueOfColumn("processed", "Y");
 		atribute.save();
 		
-		this.setDocStatus("CO");
-		this.save();
+		setDocStatus("CO");
+		setDocAction("CL");
+		setProcessed(true);
+		save();
+		//set capitle atribute
+		setHR_Attribute_ID(atribute.get_ID());
+		setGrantedDate(new Timestamp(System.currentTimeMillis()));
 		
 		return null;
 	}
 
 	@Override
 	public boolean voidIt() {
-		// TODO Auto-generated method stub
+		
+		//inactive the atribute for partucular loan
+		MHRAttribute atribute = new MHRAttribute(this.getCtx() , this.getHR_Attribute_ID() , this.get_TrxName());
+		atribute.setIsActive(false);
+		atribute.setDescription("**VOIDED**");
+		atribute.set_CustomColumn("processed", "Y");
+		atribute.save();
+		
+		//loan schedule
+		String sql = "UPDATE HR_LoanSchedule SET ISACTIVE = 'N' , PROCESSED = 'Y' WHERE HR_Loan_ID = ? ";
+		DB.executeUpdate(sql, get_ID(), get_TrxName());
+		
+		setDocStatus("VO");
+		setDocAction("--");
+		save();
+		
 		return false;
 	}
 
@@ -206,6 +272,7 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 			throw new AdempiereException("Loans canot be closed with balance!");
 		}else{
 			this.setDocStatus("CL");
+			this.setDocAction("--");
 			this.save();
 		}
 		
@@ -289,6 +356,16 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 	public static MHRLoan[] getLoans(Properties ctx, int C_BPartner_ID , String trxName){
 		
 		List<MHRLoan> list = new Query(ctx, Table_Name, COLUMNNAME_C_BPartner_ID+"=? AND DOCSTATUS = 'CO' AND ISACTIVE = 'Y' ", trxName)
+		.setParameters(C_BPartner_ID)
+		.list();
+		return list.toArray(new MHRLoan[list.size()]);
+	}
+	
+	public static MHRLoan[] getLoans(Properties ctx, int C_BPartner_ID ,int loantype , String where ,String trxName){
+		
+		String sqlWhere = COLUMNNAME_C_BPartner_ID+"=? AND ISACTIVE = 'Y' AND " + where + " AND HR_LOANTYPE_ID = "+ loantype;
+		
+		List<MHRLoan> list = new Query(ctx, Table_Name, sqlWhere, trxName)
 		.setParameters(C_BPartner_ID)
 		.list();
 		return list.toArray(new MHRLoan[list.size()]);

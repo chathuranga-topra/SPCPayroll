@@ -33,7 +33,7 @@ public class X_HR_Loan extends PO implements I_HR_Loan, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20180403L;
+	private static final long serialVersionUID = 20180410L;
 
     /** Standard Constructor */
     public X_HR_Loan (Properties ctx, int HR_Loan_ID, String trxName)
@@ -42,9 +42,10 @@ public class X_HR_Loan extends PO implements I_HR_Loan, I_Persistent
       /** if (HR_Loan_ID == 0)
         {
 			setC_BPartner_ID (0);
-			setGrantedDate (new Timestamp( System.currentTimeMillis() ));
 			setHR_LoanType_ID (0);
 			setHR_Loan_ID (0);
+			setInstallmentCount (0);
+// 0
 			setLoanAmount (Env.ZERO);
         } */
     }
@@ -76,6 +77,22 @@ public class X_HR_Loan extends PO implements I_HR_Loan, I_Persistent
         .append(get_ID()).append("]");
       return sb.toString();
     }
+
+	/** Set BP Search Key.
+		@param BPValue 
+		Business Partner Key Value
+	  */
+	public void setBPValue (String BPValue)
+	{
+		throw new IllegalArgumentException ("BPValue is virtual column");	}
+
+	/** Get BP Search Key.
+		@return Business Partner Key Value
+	  */
+	public String getBPValue () 
+	{
+		return (String)get_Value(COLUMNNAME_BPValue);
+	}
 
 	/** Set Balance.
 		@param Balance Balance	  */
@@ -261,6 +278,34 @@ public class X_HR_Loan extends PO implements I_HR_Loan, I_Persistent
 		return (Timestamp)get_Value(COLUMNNAME_GrantedDate);
 	}
 
+	public org.eevolution.model.I_HR_Attribute getHR_Attribute() throws RuntimeException
+    {
+		return (org.eevolution.model.I_HR_Attribute)MTable.get(getCtx(), org.eevolution.model.I_HR_Attribute.Table_Name)
+			.getPO(getHR_Attribute_ID(), get_TrxName());	}
+
+	/** Set Payroll Attribute.
+		@param HR_Attribute_ID 
+		Employee Attribute allows to add any metadata of type (text, date , quantity and amount ) of an Employee.
+	  */
+	public void setHR_Attribute_ID (int HR_Attribute_ID)
+	{
+		if (HR_Attribute_ID < 1) 
+			set_Value (COLUMNNAME_HR_Attribute_ID, null);
+		else 
+			set_Value (COLUMNNAME_HR_Attribute_ID, Integer.valueOf(HR_Attribute_ID));
+	}
+
+	/** Get Payroll Attribute.
+		@return Employee Attribute allows to add any metadata of type (text, date , quantity and amount ) of an Employee.
+	  */
+	public int getHR_Attribute_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_HR_Attribute_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	public spc.payroll.model.I_HR_LoanType getHR_LoanType() throws RuntimeException
     {
 		return (spc.payroll.model.I_HR_LoanType)MTable.get(getCtx(), spc.payroll.model.I_HR_LoanType.Table_Name)
@@ -323,6 +368,26 @@ public class X_HR_Loan extends PO implements I_HR_Loan, I_Persistent
 		return ii.intValue();
 	}
 
+	/** Set Interest Attribute.
+		@param InterestAttribute_ID Interest Attribute	  */
+	public void setInterestAttribute_ID (int InterestAttribute_ID)
+	{
+		if (InterestAttribute_ID < 1) 
+			set_Value (COLUMNNAME_InterestAttribute_ID, null);
+		else 
+			set_Value (COLUMNNAME_InterestAttribute_ID, Integer.valueOf(InterestAttribute_ID));
+	}
+
+	/** Get Interest Attribute.
+		@return Interest Attribute	  */
+	public int getInterestAttribute_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_InterestAttribute_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set LoanAmount.
 		@param LoanAmount LoanAmount	  */
 	public void setLoanAmount (BigDecimal LoanAmount)
@@ -338,6 +403,33 @@ public class X_HR_Loan extends PO implements I_HR_Loan, I_Persistent
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;
+	}
+
+	/** Set LoanType.
+		@param LoanType LoanType	  */
+	public void setLoanType (String LoanType)
+	{
+		throw new IllegalArgumentException ("LoanType is virtual column");	}
+
+	/** Get LoanType.
+		@return LoanType	  */
+	public String getLoanType () 
+	{
+		return (String)get_Value(COLUMNNAME_LoanType);
+	}
+
+	/** Set PayrollEffectiveDate.
+		@param PayrollEffectiveDate PayrollEffectiveDate	  */
+	public void setPayrollEffectiveDate (Timestamp PayrollEffectiveDate)
+	{
+		set_Value (COLUMNNAME_PayrollEffectiveDate, PayrollEffectiveDate);
+	}
+
+	/** Get PayrollEffectiveDate.
+		@return PayrollEffectiveDate	  */
+	public Timestamp getPayrollEffectiveDate () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_PayrollEffectiveDate);
 	}
 
 	/** Set Processed.

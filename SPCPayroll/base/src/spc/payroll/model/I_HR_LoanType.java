@@ -125,6 +125,17 @@ public interface I_HR_LoanType
 	/** Get Installment Count	  */
 	public int getInstallmentCount();
 
+    /** Column name InterestConcept_ID */
+    public static final String COLUMNNAME_InterestConcept_ID = "InterestConcept_ID";
+
+	/** Set Interest Concept	  */
+	public void setInterestConcept_ID (int InterestConcept_ID);
+
+	/** Get Interest Concept	  */
+	public int getInterestConcept_ID();
+
+	public org.eevolution.model.I_HR_Concept getInterestConcept() throws RuntimeException;
+
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
 

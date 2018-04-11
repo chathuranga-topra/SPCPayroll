@@ -21,17 +21,17 @@ import java.sql.Timestamp;
 import org.compiere.model.*;
 import org.compiere.util.KeyNamePair;
 
-/** Generated Interface for HR_LoanSchedule
+/** Generated Interface for HR_LoanEarllySettlelLine
  *  @author Adempiere (generated) 
  *  @version Release 3.8.0
  */
-public interface I_HR_LoanSchedule 
+public interface I_HR_LoanEarllySettlelLine 
 {
 
-    /** TableName=HR_LoanSchedule */
-    public static final String Table_Name = "HR_LoanSchedule";
+    /** TableName=HR_LoanEarllySettlelLine */
+    public static final String Table_Name = "HR_LoanEarllySettlelLine";
 
-    /** AD_Table_ID=1000010 */
+    /** AD_Table_ID=1000013 */
     public static final int Table_ID = MTable.getTable_ID(Table_Name);
 
     KeyNamePair Model = new KeyNamePair(Table_ID, Table_Name);
@@ -106,58 +106,14 @@ public interface I_HR_LoanSchedule
 	/** Get Earlly Settlement	  */
 	public int getHR_LoanEarllySettle_ID();
 
-	public spc.payroll.model.I_HR_LoanEarllySettle getHR_LoanEarllySettle() throws RuntimeException;
+    /** Column name HR_LoanEarllySettlelLine_ID */
+    public static final String COLUMNNAME_HR_LoanEarllySettlelLine_ID = "HR_LoanEarllySettlelLine_ID";
 
-    /** Column name HR_LoanSchedule_ID */
-    public static final String COLUMNNAME_HR_LoanSchedule_ID = "HR_LoanSchedule_ID";
+	/** Set HR_LoanEarllySettlelLine ID	  */
+	public void setHR_LoanEarllySettlelLine_ID (int HR_LoanEarllySettlelLine_ID);
 
-	/** Set HR_LoanSchedule ID	  */
-	public void setHR_LoanSchedule_ID (int HR_LoanSchedule_ID);
-
-	/** Get HR_LoanSchedule ID	  */
-	public int getHR_LoanSchedule_ID();
-
-    /** Column name HR_Loan_ID */
-    public static final String COLUMNNAME_HR_Loan_ID = "HR_Loan_ID";
-
-	/** Set HR_Loan ID	  */
-	public void setHR_Loan_ID (int HR_Loan_ID);
-
-	/** Get HR_Loan ID	  */
-	public int getHR_Loan_ID();
-
-    /** Column name HR_Movement_ID */
-    public static final String COLUMNNAME_HR_Movement_ID = "HR_Movement_ID";
-
-	/** Set Payroll Movement	  */
-	public void setHR_Movement_ID (int HR_Movement_ID);
-
-	/** Get Payroll Movement	  */
-	public int getHR_Movement_ID();
-
-	public org.eevolution.model.I_HR_Movement getHR_Movement() throws RuntimeException;
-
-    /** Column name InterestAmt */
-    public static final String COLUMNNAME_InterestAmt = "InterestAmt";
-
-	/** Set Interest Amount.
-	  * Interest Amount
-	  */
-	public void setInterestAmt (BigDecimal InterestAmt);
-
-	/** Get Interest Amount.
-	  * Interest Amount
-	  */
-	public BigDecimal getInterestAmt();
-
-    /** Column name InterestMovement_ID */
-    public static final String COLUMNNAME_InterestMovement_ID = "InterestMovement_ID";
-
-	/** Set Interest Movement	  */
-	public void setInterestMovement_ID (int InterestMovement_ID);
-
-	/** Get Interest Movement	  */
-	public int getInterestMovement_ID();
+	/** Get HR_LoanEarllySettlelLine ID	  */
+	public int getHR_LoanEarllySettlelLine_ID();
 
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
@@ -172,18 +128,14 @@ public interface I_HR_LoanSchedule
 	  */
 	public boolean isActive();
 
-    /** Column name IsPaid */
-    public static final String COLUMNNAME_IsPaid = "IsPaid";
+    /** Column name OriginalInterest */
+    public static final String COLUMNNAME_OriginalInterest = "OriginalInterest";
 
-	/** Set Paid.
-	  * The document is paid
-	  */
-	public void setIsPaid (boolean IsPaid);
+	/** Set Original Interest	  */
+	public void setOriginalInterest (BigDecimal OriginalInterest);
 
-	/** Get Paid.
-	  * The document is paid
-	  */
-	public boolean isPaid();
+	/** Get Original Interest	  */
+	public BigDecimal getOriginalInterest();
 
     /** Column name Processed */
     public static final String COLUMNNAME_Processed = "Processed";
@@ -197,6 +149,24 @@ public interface I_HR_LoanSchedule
 	  * The document has been processed
 	  */
 	public boolean isProcessed();
+
+    /** Column name RemainingDays */
+    public static final String COLUMNNAME_RemainingDays = "RemainingDays";
+
+	/** Set Remaining Days	  */
+	public void setRemainingDays (int RemainingDays);
+
+	/** Get Remaining Days	  */
+	public int getRemainingDays();
+
+    /** Column name RevisedInterest */
+    public static final String COLUMNNAME_RevisedInterest = "RevisedInterest";
+
+	/** Set Revised Interest	  */
+	public void setRevisedInterest (BigDecimal RevisedInterest);
+
+	/** Get Revised Interest	  */
+	public BigDecimal getRevisedInterest();
 
     /** Column name SeqNo */
     public static final String COLUMNNAME_SeqNo = "SeqNo";

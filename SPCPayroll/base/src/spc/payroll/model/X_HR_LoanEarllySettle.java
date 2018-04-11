@@ -44,6 +44,8 @@ public class X_HR_LoanEarllySettle extends PO implements I_HR_LoanEarllySettle, 
 			setC_BPartner_ID (0);
 			setHR_LoanEarllySettle_ID (0);
 			setHR_Loan_ID (0);
+			setPaymentDocumentNo (null);
+			setRemainingDays (0);
 			setSettleDate (new Timestamp( System.currentTimeMillis() ));
         } */
     }
@@ -247,8 +249,8 @@ public class X_HR_LoanEarllySettle extends PO implements I_HR_LoanEarllySettle, 
 		return (String)get_Value(COLUMNNAME_DocumentNo);
 	}
 
-	/** Set HR_LoanEarllySettle ID.
-		@param HR_LoanEarllySettle_ID HR_LoanEarllySettle ID	  */
+	/** Set Earlly Settlement.
+		@param HR_LoanEarllySettle_ID Earlly Settlement	  */
 	public void setHR_LoanEarllySettle_ID (int HR_LoanEarllySettle_ID)
 	{
 		if (HR_LoanEarllySettle_ID < 1) 
@@ -257,8 +259,8 @@ public class X_HR_LoanEarllySettle extends PO implements I_HR_LoanEarllySettle, 
 			set_ValueNoCheck (COLUMNNAME_HR_LoanEarllySettle_ID, Integer.valueOf(HR_LoanEarllySettle_ID));
 	}
 
-	/** Get HR_LoanEarllySettle ID.
-		@return HR_LoanEarllySettle ID	  */
+	/** Get Earlly Settlement.
+		@return Earlly Settlement	  */
 	public int getHR_LoanEarllySettle_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_HR_LoanEarllySettle_ID);
@@ -292,6 +294,57 @@ public class X_HR_LoanEarllySettle extends PO implements I_HR_LoanEarllySettle, 
 		return ii.intValue();
 	}
 
+	/** Set New Interest Total.
+		@param NewInterestTotal New Interest Total	  */
+	public void setNewInterestTotal (BigDecimal NewInterestTotal)
+	{
+		set_Value (COLUMNNAME_NewInterestTotal, NewInterestTotal);
+	}
+
+	/** Get New Interest Total.
+		@return New Interest Total	  */
+	public BigDecimal getNewInterestTotal () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_NewInterestTotal);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Old Interest Total.
+		@param OldInterestTotal Old Interest Total	  */
+	public void setOldInterestTotal (BigDecimal OldInterestTotal)
+	{
+		set_Value (COLUMNNAME_OldInterestTotal, OldInterestTotal);
+	}
+
+	/** Get Old Interest Total.
+		@return Old Interest Total	  */
+	public BigDecimal getOldInterestTotal () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_OldInterestTotal);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Payment Document No.
+		@param PaymentDocumentNo 
+		Document number of the Payment
+	  */
+	public void setPaymentDocumentNo (String PaymentDocumentNo)
+	{
+		set_Value (COLUMNNAME_PaymentDocumentNo, PaymentDocumentNo);
+	}
+
+	/** Get Payment Document No.
+		@return Document number of the Payment
+	  */
+	public String getPaymentDocumentNo () 
+	{
+		return (String)get_Value(COLUMNNAME_PaymentDocumentNo);
+	}
+
 	/** Set Processed.
 		@param Processed 
 		The document has been processed
@@ -314,6 +367,23 @@ public class X_HR_LoanEarllySettle extends PO implements I_HR_LoanEarllySettle, 
 			return "Y".equals(oo);
 		}
 		return false;
+	}
+
+	/** Set Remaining Days.
+		@param RemainingDays Remaining Days	  */
+	public void setRemainingDays (int RemainingDays)
+	{
+		set_Value (COLUMNNAME_RemainingDays, Integer.valueOf(RemainingDays));
+	}
+
+	/** Get Remaining Days.
+		@return Remaining Days	  */
+	public int getRemainingDays () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_RemainingDays);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set Settle Date.
