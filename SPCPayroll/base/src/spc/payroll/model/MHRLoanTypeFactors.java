@@ -23,7 +23,4 @@ public class MHRLoanTypeFactors extends X_HR_LoanTypeFactors{
 		
 		return true;
 	}
-	
-	
-
 }

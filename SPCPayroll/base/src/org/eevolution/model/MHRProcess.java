@@ -268,10 +268,6 @@ public class MHRProcess extends X_HR_Process implements DocAction
 	 */
 	public String completeIt()
 	{
-		
-		System.out.println("Hello : completeIt from " + this.get_TableName());
-		
-		
 		//	Re-Check
 		if (!m_justPrepared)
 		{
@@ -500,9 +496,20 @@ public class MHRProcess extends X_HR_Process implements DocAction
 		
 		//	Can we delete posting
 		MPeriod.testPeriodOpen(getCtx(), getDateAcct(), MPeriodControl.DOCBASETYPE_Payroll, getAD_Org_ID());
+		
+		//before delete movements, update loan schedule as no paid
+		String sql = "UPDATE HR_LoanSchedule SET "
+			+ " ISPAID =  'N' , PROCESSED = 'N' , HR_MOVEMENT_ID = NULL , INTERESTMOVEMENT_ID = null "
+			+ " WHERE HR_LOANSCHEDULE_ID IN (SELECT HR_LOANSCHEDULE_ID "
+			+ " FROM HR_LoanSchedule WHERE "
+			+ " HR_Movement_ID IN "
+			+ " (SELECT HR_Movement_ID FROM  HR_Movement WHERE HR_Process_ID = ?)"
+			+ " OR INTERESTMOVEMENT_ID IN (SELECT HR_Movement_ID FROM  HR_Movement WHERE HR_Process_ID = "+this.get_ID()+"))";
+		
+		DB.executeUpdate(sql, this.get_ID(), get_TrxName());
 
 		//	Delete 
-		String sql = "DELETE FROM HR_Movement WHERE HR_Process_ID =" + this.getHR_Process_ID() + " AND IsManual = 'N'" ;
+		sql = "DELETE FROM HR_Movement WHERE HR_Process_ID =" + this.getHR_Process_ID() + " AND IsManual = 'N'" ;
 		int no = DB.executeUpdateEx(sql, get_TrxName());
 		log.fine("HR_Process deleted #" + no);
 

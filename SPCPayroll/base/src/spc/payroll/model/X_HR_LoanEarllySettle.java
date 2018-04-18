@@ -33,7 +33,7 @@ public class X_HR_LoanEarllySettle extends PO implements I_HR_LoanEarllySettle, 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20180403L;
+	private static final long serialVersionUID = 20180418L;
 
     /** Standard Constructor */
     public X_HR_LoanEarllySettle (Properties ctx, int HR_LoanEarllySettle_ID, String trxName)
@@ -44,9 +44,8 @@ public class X_HR_LoanEarllySettle extends PO implements I_HR_LoanEarllySettle, 
 			setC_BPartner_ID (0);
 			setHR_LoanEarllySettle_ID (0);
 			setHR_Loan_ID (0);
-			setPaymentDocumentNo (null);
-			setRemainingDays (0);
 			setSettleDate (new Timestamp( System.currentTimeMillis() ));
+			setType (null);
         } */
     }
 
@@ -369,23 +368,6 @@ public class X_HR_LoanEarllySettle extends PO implements I_HR_LoanEarllySettle, 
 		return false;
 	}
 
-	/** Set Remaining Days.
-		@param RemainingDays Remaining Days	  */
-	public void setRemainingDays (int RemainingDays)
-	{
-		set_Value (COLUMNNAME_RemainingDays, Integer.valueOf(RemainingDays));
-	}
-
-	/** Get Remaining Days.
-		@return Remaining Days	  */
-	public int getRemainingDays () 
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_RemainingDays);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	/** Set Settle Date.
 		@param SettleDate Settle Date	  */
 	public void setSettleDate (Timestamp SettleDate)
@@ -398,5 +380,45 @@ public class X_HR_LoanEarllySettle extends PO implements I_HR_LoanEarllySettle, 
 	public Timestamp getSettleDate () 
 	{
 		return (Timestamp)get_Value(COLUMNNAME_SettleDate);
+	}
+
+	/** Set TotalPayable.
+		@param TotalPayable TotalPayable	  */
+	public void setTotalPayable (BigDecimal TotalPayable)
+	{
+		throw new IllegalArgumentException ("TotalPayable is virtual column");	}
+
+	/** Get TotalPayable.
+		@return TotalPayable	  */
+	public BigDecimal getTotalPayable () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_TotalPayable);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Type AD_Reference_ID=1000021 */
+	public static final int TYPE_AD_Reference_ID=1000021;
+	/** Full = FS */
+	public static final String TYPE_Full = "FS";
+	/** 2 of 3 = TT */
+	public static final String TYPE_2Of3 = "TT";
+	/** Set Type.
+		@param Type 
+		Type of Validation (SQL, Java Script, Java Language)
+	  */
+	public void setType (String Type)
+	{
+
+		set_Value (COLUMNNAME_Type, Type);
+	}
+
+	/** Get Type.
+		@return Type of Validation (SQL, Java Script, Java Language)
+	  */
+	public String getType () 
+	{
+		return (String)get_Value(COLUMNNAME_Type);
 	}
 }

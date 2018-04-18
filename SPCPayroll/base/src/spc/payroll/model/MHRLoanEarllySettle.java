@@ -30,20 +30,26 @@ public class MHRLoanEarllySettle extends X_HR_LoanEarllySettle implements DocAct
 		MHRLoan loan = new MHRLoan(getCtx() , this.getHR_Loan_ID() , get_TrxName());
 		this.setBalance(MHRLoan.getBalance(loan));
 		
-		// need to check loan amount paid more than 3/2 installment
-		
-		
 		//get total interest for no paid schedule
 		String sql = "SELECT SUM(interestamt) FROM HR_LoanSchedule WHERE HR_Loan_ID = ? and ispaid = 'N' AND IsActive = 'Y'";
 		
 		BigDecimal oldInterest = DB.getSQLValueBD(this.get_TrxName(), sql, this.getHR_Loan_ID());
 		this.setOldInterestTotal(oldInterest);
-		//calculate remaining days and new total interest
+		/*//calculate remaining days and new total interest
 		sql = " SELECT MAX(EFFECTIVEFROM) - MIN(EFFECTIVEFROM) as RemainDays "
 		+ " FROM HR_LoanSchedule WHERE ISPAID = 'N' AND HR_Loan_ID = ? ";
 		
 		int days =  DB.getSQLValue(get_TrxName(), sql,this.getHR_Loan_ID());
-		this.setRemainingDays(days);
+		this.setRemainingDays(days);*/
+		
+		BigDecimal newInterest = new BigDecimal(0);
+		
+		//calculate new interest based on the interesrt type
+		if(this.getType().equals("TT")){//2 of 3 payment
+			System.out.println("2 of 3");
+		}else if(this.getType().equals("FS")){//full payment
+			System.out.println("full payment");
+		}
 		
 		return true;
 	}

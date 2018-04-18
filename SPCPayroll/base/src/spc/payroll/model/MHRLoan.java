@@ -39,7 +39,7 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 	protected boolean beforeSave(boolean newRecord){
 		
 		//validate duplicate loans opening
-		 int length = MHRLoan.getLoans(getCtx(), getC_BPartner_ID(), getHR_LoanType_ID(), " DOCSTATUS NOT IN('CL') AND "
+		 int length = MHRLoan.getLoans(getCtx(), getC_BPartner_ID(), getHR_LoanType_ID(), " DOCSTATUS NOT IN('CL' , 'VO') AND "
 		 		+ "HR_LOAN_ID NOT IN ("+get_ID()+")", get_TrxName()).length;
 		 if(length >= 1)
 			 throw new AdempiereException("DUPLICATE LOAN DOCUMENT!Your are not allowed to open duplicate loans");
@@ -171,7 +171,8 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 		for(int i = 0;i < installmentCount;i++){
 			
 			sc = new MHRLoanSchedule(p_ctx, 0, this.get_TrxName());
-			sc.setCapitalAmt(new BigDecimal(monthCapital).setScale(2, RoundingMode.HALF_UP));
+			
+			sc.setCapitalAmt(new BigDecimal(monthCapital).setScale(0, RoundingMode.HALF_UP));
 			sc.setInterestAmt(new BigDecimal(interest).setScale(2, RoundingMode.HALF_UP));
 			sc.setHR_Loan_ID(this.get_ID());
 			sc.setSeqNo(i+1);
@@ -181,6 +182,12 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 	        sc.setEffectiveFrom(new Timestamp(cal.getTime().getTime()));
 	        sc.save();
 		}
+		
+		//less the total capitle amount difference from last schedule line
+		sql = "SELECT LOANAMOUNT - (SELECT SUM(CAPITALAMT) FROM HR_LoanSchedule WHERE HR_Loan_ID=?) FROM HR_Loan WHERE HR_Loan_ID=?";
+		BigDecimal diff = DB.getSQLValueBD(get_TrxName(), sql, get_ID() , get_ID());
+		sc.setCapitalAmt(sc.getCapitalAmt().add(diff));
+		sc.save();
 		
 		this.setDocStatus("IP");
 		this.save();
@@ -248,10 +255,14 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 		
 		//inactive the atribute for partucular loan
 		MHRAttribute atribute = new MHRAttribute(this.getCtx() , this.getHR_Attribute_ID() , this.get_TrxName());
-		atribute.setIsActive(false);
-		atribute.setDescription("**VOIDED**");
-		atribute.set_CustomColumn("processed", "Y");
-		atribute.save();
+		
+		if(atribute.get_ID() != 0){//no atributte
+			
+			atribute.setIsActive(false);
+			atribute.setDescription("**VOIDED**");
+			atribute.set_CustomColumn("processed", "Y");
+			atribute.save();
+		}
 		
 		//loan schedule
 		String sql = "UPDATE HR_LoanSchedule SET ISACTIVE = 'N' , PROCESSED = 'Y' WHERE HR_Loan_ID = ? ";
@@ -259,9 +270,10 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 		
 		setDocStatus("VO");
 		setDocAction("--");
+		setProcessed(true);
 		save();
 		
-		return false;
+		return true;
 	}
 
 	@Override

@@ -232,15 +232,6 @@ public interface I_HR_LoanEarllySettle
 	  */
 	public boolean isProcessed();
 
-    /** Column name RemainingDays */
-    public static final String COLUMNNAME_RemainingDays = "RemainingDays";
-
-	/** Set Remaining Days	  */
-	public void setRemainingDays (int RemainingDays);
-
-	/** Get Remaining Days	  */
-	public int getRemainingDays();
-
     /** Column name SettleDate */
     public static final String COLUMNNAME_SettleDate = "SettleDate";
 
@@ -249,6 +240,28 @@ public interface I_HR_LoanEarllySettle
 
 	/** Get Settle Date	  */
 	public Timestamp getSettleDate();
+
+    /** Column name TotalPayable */
+    public static final String COLUMNNAME_TotalPayable = "TotalPayable";
+
+	/** Set TotalPayable	  */
+	public void setTotalPayable (BigDecimal TotalPayable);
+
+	/** Get TotalPayable	  */
+	public BigDecimal getTotalPayable();
+
+    /** Column name Type */
+    public static final String COLUMNNAME_Type = "Type";
+
+	/** Set Type.
+	  * Type of Validation (SQL, Java Script, Java Language)
+	  */
+	public void setType (String Type);
+
+	/** Get Type.
+	  * Type of Validation (SQL, Java Script, Java Language)
+	  */
+	public String getType();
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";
