@@ -39,23 +39,13 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 	protected boolean beforeSave(boolean newRecord){
 		
 		//validate duplicate loans opening
-		 int length = MHRLoan.getLoans(getCtx(), getC_BPartner_ID(), getHR_LoanType_ID(), " DOCSTATUS NOT IN('CL' , 'VO') AND "
-		 		+ "HR_LOAN_ID NOT IN ("+get_ID()+")", get_TrxName()).length;
-		 if(length >= 1)
-			 throw new AdempiereException("DUPLICATE LOAN DOCUMENT!Your are not allowed to open duplicate loans");
-				 
-		
+		this.validateDuplicate();
 		//validation for fastival advance for current year opening more than one
-		if(this.getHR_LoanType_ID() == 1000006){ // loan type is hard corded
-			String sql = "SELECT NVL(CASE WHEN EXTRACT (YEAR FROM GRANTEDDATE) = EXTRACT (YEAR FROM CURRENT_DATE)THEN"
-			+ " CAST (DOCUMENTNO AS VARCHAR(12)) ELSE 'N' END , 'N') FROM HR_Loan WHERE C_BPartner_ID = ? "
-			+ " AND HR_LoanType_ID = ? AND HR_LOAN_ID NOT IN (?)"
-			+ " AND AD_Client_ID = ? ";
+		this.validateFastivalAdvance();
+		//Salary advance : one for one month
+		if(getHR_LoanType_ID() == 1000012){
+			//one month can get only one sallary advance
 			
-			String res = DB.getSQLValueString(get_TrxName(), sql, getC_BPartner_ID() , getHR_LoanType_ID() , get_ID() , getAD_Client_ID());
-			
-			if(!(res == null || res.equalsIgnoreCase("N")))
-				throw new AdempiereException("Duplicate advance! ~ Document No - " + res);
 		}
 		
 		//basic sallary :: concept is hard corded
@@ -102,9 +92,6 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 		if(getHR_LoanType().getInterestConcept_ID() == 0){ //no interest attribute
 			setInterestAttribute_ID(0);
 		}
-		
-		//Within 40% limit grant should be given (From basic+safety+travelling+cost of living 40% can be taken).
-		String sql = "SELECT * FROM";
 		
 		return true;
 	}
@@ -428,6 +415,31 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 		
 		String WhereClause = " HR_Loan_ID="+loan.get_ID()+" AND ISPAID = 'N' ";
 		return MHRLoan.getAllIDs("HR_LoanSchedule", WhereClause, loan.get_TrxName()).length;
+	}
+	
+	private void validateDuplicate(){
+		
+		int length = MHRLoan.getLoans(getCtx(), getC_BPartner_ID(), getHR_LoanType_ID(), " DOCSTATUS NOT IN('CL' , 'VO') AND "
+		 		+ "HR_LOAN_ID NOT IN ("+get_ID()+")", get_TrxName()).length;
+		 if(length >= 1)
+			 throw new AdempiereException("DUPLICATE LOAN DOCUMENT!Your are not allowed to open duplicate loans");
+	}
+	
+	private void validateFastivalAdvance(){
+		
+		//one year can get only one fastival advance
+		
+		if(this.getHR_LoanType_ID() == 1000006){ // loan type is hard corded
+			String sql = "SELECT NVL(CASE WHEN EXTRACT (YEAR FROM GRANTEDDATE) = EXTRACT (YEAR FROM CURRENT_DATE)THEN"
+			+ " CAST (DOCUMENTNO AS VARCHAR(12)) ELSE 'N' END , 'N') FROM HR_Loan WHERE C_BPartner_ID = ? "
+			+ " AND HR_LoanType_ID = ? AND HR_LOAN_ID NOT IN (?)"
+			+ " AND AD_Client_ID = ? ";
+			
+			String res = DB.getSQLValueString(get_TrxName(), sql, getC_BPartner_ID() , getHR_LoanType_ID() , get_ID() , getAD_Client_ID());
+			
+			if(!(res == null || res.equalsIgnoreCase("N")))
+				throw new AdempiereException("Duplicate advance! ~ Document No - " + res);
+		}
 	}
 	
 }
