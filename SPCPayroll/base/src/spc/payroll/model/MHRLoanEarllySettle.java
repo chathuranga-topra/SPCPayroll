@@ -2,9 +2,13 @@ package spc.payroll.model;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.ResultSet;
+import java.util.List;
 import java.util.Properties;
 
+import org.adempiere.exceptions.AdempiereException;
+import org.compiere.model.Query;
 import org.compiere.process.DocAction;
 import org.compiere.process.DocOptions;
 import org.compiere.process.DocumentEngine;
@@ -26,30 +30,63 @@ public class MHRLoanEarllySettle extends X_HR_LoanEarllySettle implements DocAct
 	
 	protected boolean beforeSave(boolean newRecord){
 		
+		//validate duplicate loans opening
+		String whereClause = "DOCSTATUS NOT IN('VO' , 'CO') AND HR_LOAN_ID = "+getHR_Loan_ID()+" AND HR_LoanEarllySettle_ID NOT IN ("+get_ID()+")";
+		int length = MHRLoanEarllySettle.getAllIDs("HR_LoanEarllySettle", whereClause , get_TrxName()).length;
+		
+		if(length >= 1)
+			throw new AdempiereException("DUPLICATE DOCUMENT OPENED! Your are not allowed to open duplicate");
+		
+		if(!getDocStatus().equals("DR"))
+			return true;
+		
 		//set loan balance
 		MHRLoan loan = new MHRLoan(getCtx() , this.getHR_Loan_ID() , get_TrxName());
-		this.setBalance(MHRLoan.getBalance(loan));
+		BigDecimal balance = new BigDecimal(0);
+		BigDecimal ir = loan.getHR_LoanType().getRate();
+		int paybleInstallmentCount = 0;
+		double interest = 0.00;
+		//BigDecimal newInterest = new BigDecimal(0);
+		
 		
 		//get total interest for no paid schedule
 		String sql = "SELECT SUM(interestamt) FROM HR_LoanSchedule WHERE HR_Loan_ID = ? and ispaid = 'N' AND IsActive = 'Y'";
 		
 		BigDecimal oldInterest = DB.getSQLValueBD(this.get_TrxName(), sql, this.getHR_Loan_ID());
 		this.setOldInterestTotal(oldInterest);
-		/*//calculate remaining days and new total interest
-		sql = " SELECT MAX(EFFECTIVEFROM) - MIN(EFFECTIVEFROM) as RemainDays "
-		+ " FROM HR_LoanSchedule WHERE ISPAID = 'N' AND HR_Loan_ID = ? ";
 		
-		int days =  DB.getSQLValue(get_TrxName(), sql,this.getHR_Loan_ID());
-		this.setRemainingDays(days);*/
+		//set paid count
+		setPaidInstallmentCount(MHRLoan.getPaidInstallmentCount(loan));
 		
-		BigDecimal newInterest = new BigDecimal(0);
 		
-		//calculate new interest based on the interesrt type
+		
+		//calculate new interest based on the settlment type
 		if(this.getType().equals("TT")){//2 of 3 payment
-			System.out.println("2 of 3");
+			
+			//get 2 of third 3 rest payment schedule
+			sql = "SELECT MIN(SEQNO) FROM HR_LoanSchedule WHERE HR_Loan_ID = ? AND ISPAID = 'N'";
+			int from = DB.getSQLValue(get_TrxName(), sql, getHR_Loan_ID());
+			sql = "SELECT COUNT(*) * 2 /3  FROM HR_LoanSchedule WHERE HR_Loan_ID = ?";
+			int to = DB.getSQLValue(get_TrxName(), sql, getHR_Loan_ID());
+			
+			if(from > to){//already paid 2 of 3
+				throw new AdempiereException("ERROR! Already paid 2 of 3 from this loan");
+			}
+			
+			paybleInstallmentCount = to - from + 1;
+			
 		}else if(this.getType().equals("FS")){//full payment
-			System.out.println("full payment");
+			
+			interest = ((((getBalance().doubleValue() * ir.doubleValue() / 100) * 1/12) * 
+			(getPayableInstallmentCount() + 1) / getPayableInstallmentCount()) * 1/2);
+			setNewInterestTotal(new BigDecimal(interest).setScale(2, RoundingMode.HALF_UP).multiply(new BigDecimal(getPayableInstallmentCount())).setScale(2, RoundingMode.HALF_UP));
+			paybleInstallmentCount = MHRLoan.getPayableInstallmentCount(loan);
+			balance = MHRLoan.getBalance(loan);
 		}
+		
+		
+		this.setBalance(balance);
+		setPayableInstallmentCount(paybleInstallmentCount);
 		
 		return true;
 	}
@@ -83,9 +120,6 @@ public class MHRLoanEarllySettle extends X_HR_LoanEarllySettle implements DocAct
 		else if(action.equals("--") && getDocAction().equalsIgnoreCase("VO"))
 			this.voidIt();
 		
-		System.out.println("action : " + action);
-		System.out.println("getDocAction() : " + getDocAction());
-		
 		return true;
 	}
 
@@ -103,9 +137,25 @@ public class MHRLoanEarllySettle extends X_HR_LoanEarllySettle implements DocAct
 
 	@Override
 	public String prepareIt() {
+		//delete existing records
+		String sql = "DELETE FROM HR_LoanEarllySettlelLine WHERE HR_LoanEarllySettle_ID = ? ";
+		DB.executeUpdate(sql, this.get_ID(), this.get_TrxName());
+		MHRLoanSchedule[] lns = null;
 		
-		//coping loan schedule
-		MHRLoanSchedule[] lns = MHRLoan.getLoanUpPaidSchedule(getCtx(), this.getHR_Loan_ID(), get_TrxName());
+		if(getType().equals("FS")){//full settlement
+			lns = MHRLoan.getLoanUpPaidSchedule(getCtx(), this.getHR_Loan_ID(), get_TrxName());
+		}else if(getType().equals("TT")){//2 of 3 third settlement
+		
+			//get 2 of third 3 rest payment schedule
+			sql = "SELECT MIN(SEQNO) FROM HR_LoanSchedule WHERE HR_Loan_ID = ? AND ISPAID = 'N'";
+			int from = DB.getSQLValue(get_TrxName(), sql, getHR_Loan_ID());
+			sql = "SELECT COUNT(*) * 2 /3  FROM HR_LoanSchedule WHERE HR_Loan_ID = ?";
+			int to = DB.getSQLValue(get_TrxName(), sql, getHR_Loan_ID());
+			
+			if(from >=to){//already paid 2 of 3
+				throw new AdempiereException("ERROR! Already paid 2 of 3 from this loan");
+			}
+		}
 		
 		MHRLoanEarllySettlelLine sLine;
 		for(MHRLoanSchedule sc : lns){
@@ -116,9 +166,9 @@ public class MHRLoanEarllySettle extends X_HR_LoanEarllySettle implements DocAct
 			sLine.setEffectiveFrom(sc.getEffectiveFrom());
 			sLine.setCapitalAmt(sc.getCapitalAmt());
 			sLine.setOriginalInterest(sc.getInterestAmt());
-			sLine.setRevisedInterest(new BigDecimal(0));
-			sLine.setRemainingDays(10);
+			sLine.setRevisedInterest(getNewInterestTotal().divide(new BigDecimal(getPayableInstallmentCount())).setScale(2, RoundingMode.HALF_UP));
 			
+			sLine.setHR_LoanSchedule_ID(sc.get_ID());
 			sLine.save();
 		}
 		
@@ -142,13 +192,61 @@ public class MHRLoanEarllySettle extends X_HR_LoanEarllySettle implements DocAct
 
 	@Override
 	public String completeIt() {
-		// TODO Auto-generated method stub
-		return null;
+		
+		this.prepareIt();
+		//copy revised interest plan to loan schedule
+		MHRLoanEarllySettlelLine[] lines = this.getLines(this);
+		MHRLoanSchedule sch = null;
+		
+		for(MHRLoanEarllySettlelLine l: lines){
+			
+			sch = new MHRLoanSchedule(getCtx(), l.getHR_LoanSchedule_ID(), get_TrxName());
+			sch.setInterestAmt(l.getRevisedInterest());
+			sch.setHR_LoanEarllySettle_ID(get_ID());
+			sch.setIsPaid(true);
+			sch.setProcessed(true);
+			sch.save();
+			l.setProcessed(true);
+			l.save();
+		}
+		
+		if(getType().equals("FS")){//closed the loan if full paid
+			MHRLoan loan = new MHRLoan(getCtx(),sch.getHR_Loan_ID(),get_TrxName());
+			loan.closeIt();
+			setProcessed(true);
+		}
+		
+		setDocStatus("CO");
+		setDocAction("CL");
+		
+		return "Done!";
 	}
 
 	@Override
 	public boolean voidIt() {
-		// TODO Auto-generated method stub
+		
+		String sql = "";
+		
+		if(getDocStatus().equals("CO")){
+			//remove updated data from loan schedule
+			sql = "UPDATE HR_LoanSchedule SET PROCESSED = 'N'  , ISPAID = 'N' , HR_LoanEarllySettle_ID = null WHERE HR_LoanEarllySettle_ID = ?";
+			DB.executeUpdate(sql, get_ID(), get_TrxName());
+			
+			//UNCLOSED LOAN
+			MHRLoan loan = (MHRLoan) this.getHR_Loan();
+			System.out.println(loan.getBalance());
+			loan.setDocAction("CL");
+			loan.setDocStatus("CO");
+			loan.save();
+		}
+		
+		sql = "UPDATE HR_LoanEarllySettlelLine SET PROCESSED = 'Y' WHERE HR_LoanEarllySettle_ID = ?";
+		DB.executeUpdate(sql, get_ID(), get_TrxName());
+		
+		setDocStatus("VO");
+		setDocAction("--");
+		setProcessed(true);
+		
 		return false;
 	}
 
@@ -217,5 +315,12 @@ public class MHRLoanEarllySettle extends X_HR_LoanEarllySettle implements DocAct
 		// TODO Auto-generated method stub
 		return null;
 	}
-
+	
+	public MHRLoanEarllySettlelLine[] getLines(MHRLoanEarllySettle les){
+		
+		List<MHRLoanEarllySettlelLine> list = new Query(les.getCtx(), MHRLoanEarllySettlelLine.Table_Name, "HR_LoanEarllySettle_ID = ? ", les.get_TrxName())
+		.setParameters(les.get_ID())
+		.list();
+		return list.toArray(new MHRLoanEarllySettlelLine[list.size()]);
+	}
 }

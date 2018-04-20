@@ -206,6 +206,24 @@ public interface I_HR_LoanEarllySettle
 	/** Get Old Interest Total	  */
 	public BigDecimal getOldInterestTotal();
 
+    /** Column name PaidInstallmentCount */
+    public static final String COLUMNNAME_PaidInstallmentCount = "PaidInstallmentCount";
+
+	/** Set Paid Installment Count	  */
+	public void setPaidInstallmentCount (int PaidInstallmentCount);
+
+	/** Get Paid Installment Count	  */
+	public int getPaidInstallmentCount();
+
+    /** Column name PayableInstallmentCount */
+    public static final String COLUMNNAME_PayableInstallmentCount = "PayableInstallmentCount";
+
+	/** Set Payable Installment Count	  */
+	public void setPayableInstallmentCount (int PayableInstallmentCount);
+
+	/** Get Payable Installment Count	  */
+	public int getPayableInstallmentCount();
+
     /** Column name PaymentDocumentNo */
     public static final String COLUMNNAME_PaymentDocumentNo = "PaymentDocumentNo";
 

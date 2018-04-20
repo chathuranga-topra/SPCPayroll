@@ -33,7 +33,7 @@ public class X_HR_LoanEarllySettlelLine extends PO implements I_HR_LoanEarllySet
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20180404L;
+	private static final long serialVersionUID = 20180419L;
 
     /** Standard Constructor */
     public X_HR_LoanEarllySettlelLine (Properties ctx, int HR_LoanEarllySettlelLine_ID, String trxName)
@@ -45,7 +45,6 @@ public class X_HR_LoanEarllySettlelLine extends PO implements I_HR_LoanEarllySet
 			setEffectiveFrom (new Timestamp( System.currentTimeMillis() ));
 			setHR_LoanEarllySettlelLine_ID (0);
 			setOriginalInterest (Env.ZERO);
-			setRemainingDays (0);
 			setRevisedInterest (Env.ZERO);
 			setSeqNo (0);
         } */
@@ -150,6 +149,26 @@ public class X_HR_LoanEarllySettlelLine extends PO implements I_HR_LoanEarllySet
 		return ii.intValue();
 	}
 
+	/** Set HR_LoanSchedule ID.
+		@param HR_LoanSchedule_ID HR_LoanSchedule ID	  */
+	public void setHR_LoanSchedule_ID (int HR_LoanSchedule_ID)
+	{
+		if (HR_LoanSchedule_ID < 1) 
+			set_Value (COLUMNNAME_HR_LoanSchedule_ID, null);
+		else 
+			set_Value (COLUMNNAME_HR_LoanSchedule_ID, Integer.valueOf(HR_LoanSchedule_ID));
+	}
+
+	/** Get HR_LoanSchedule ID.
+		@return HR_LoanSchedule ID	  */
+	public int getHR_LoanSchedule_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_HR_LoanSchedule_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set Original Interest.
 		@param OriginalInterest Original Interest	  */
 	public void setOriginalInterest (BigDecimal OriginalInterest)
@@ -189,23 +208,6 @@ public class X_HR_LoanEarllySettlelLine extends PO implements I_HR_LoanEarllySet
 			return "Y".equals(oo);
 		}
 		return false;
-	}
-
-	/** Set Remaining Days.
-		@param RemainingDays Remaining Days	  */
-	public void setRemainingDays (int RemainingDays)
-	{
-		set_Value (COLUMNNAME_RemainingDays, Integer.valueOf(RemainingDays));
-	}
-
-	/** Get Remaining Days.
-		@return Remaining Days	  */
-	public int getRemainingDays () 
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_RemainingDays);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
 	}
 
 	/** Set Revised Interest.

@@ -271,7 +271,6 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 		setDocStatus("VO");
 		setDocAction("--");
 		setProcessed(true);
-		save();
 		
 		return true;
 	}
@@ -418,6 +417,17 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 		BigDecimal paid = DB.getSQLValueBD(loan.get_TrxName(), sql, loan.get_ID());
 		
 		return loan .getLoanAmount().subtract(paid);
+	}
+	
+	public static int getPaidInstallmentCount(MHRLoan loan){
+		String WhereClause = " HR_Loan_ID="+loan.get_ID()+" AND ISPAID = 'Y' ";
+		return MHRLoan.getAllIDs("HR_LoanSchedule", WhereClause, loan.get_TrxName()).length;
+	}
+	
+	public static int getPayableInstallmentCount(MHRLoan loan){
+		
+		String WhereClause = " HR_Loan_ID="+loan.get_ID()+" AND ISPAID = 'N' ";
+		return MHRLoan.getAllIDs("HR_LoanSchedule", WhereClause, loan.get_TrxName()).length;
 	}
 	
 }

@@ -327,6 +327,40 @@ public class X_HR_LoanEarllySettle extends PO implements I_HR_LoanEarllySettle, 
 		return bd;
 	}
 
+	/** Set Paid Installment Count.
+		@param PaidInstallmentCount Paid Installment Count	  */
+	public void setPaidInstallmentCount (int PaidInstallmentCount)
+	{
+		set_Value (COLUMNNAME_PaidInstallmentCount, Integer.valueOf(PaidInstallmentCount));
+	}
+
+	/** Get Paid Installment Count.
+		@return Paid Installment Count	  */
+	public int getPaidInstallmentCount () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_PaidInstallmentCount);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Payable Installment Count.
+		@param PayableInstallmentCount Payable Installment Count	  */
+	public void setPayableInstallmentCount (int PayableInstallmentCount)
+	{
+		set_Value (COLUMNNAME_PayableInstallmentCount, Integer.valueOf(PayableInstallmentCount));
+	}
+
+	/** Get Payable Installment Count.
+		@return Payable Installment Count	  */
+	public int getPayableInstallmentCount () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_PayableInstallmentCount);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set Payment Document No.
 		@param PaymentDocumentNo 
 		Document number of the Payment

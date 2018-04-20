@@ -115,6 +115,15 @@ public interface I_HR_LoanEarllySettlelLine
 	/** Get HR_LoanEarllySettlelLine ID	  */
 	public int getHR_LoanEarllySettlelLine_ID();
 
+    /** Column name HR_LoanSchedule_ID */
+    public static final String COLUMNNAME_HR_LoanSchedule_ID = "HR_LoanSchedule_ID";
+
+	/** Set HR_LoanSchedule ID	  */
+	public void setHR_LoanSchedule_ID (int HR_LoanSchedule_ID);
+
+	/** Get HR_LoanSchedule ID	  */
+	public int getHR_LoanSchedule_ID();
+
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
 
@@ -149,15 +158,6 @@ public interface I_HR_LoanEarllySettlelLine
 	  * The document has been processed
 	  */
 	public boolean isProcessed();
-
-    /** Column name RemainingDays */
-    public static final String COLUMNNAME_RemainingDays = "RemainingDays";
-
-	/** Set Remaining Days	  */
-	public void setRemainingDays (int RemainingDays);
-
-	/** Get Remaining Days	  */
-	public int getRemainingDays();
 
     /** Column name RevisedInterest */
     public static final String COLUMNNAME_RevisedInterest = "RevisedInterest";
