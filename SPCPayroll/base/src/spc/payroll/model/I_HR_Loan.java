@@ -168,6 +168,24 @@ public interface I_HR_Loan
 	  */
 	public String getDocumentNo();
 
+    /** Column name FPBalance */
+    public static final String COLUMNNAME_FPBalance = "FPBalance";
+
+	/** Set FP Balance	  */
+	public void setFPBalance (BigDecimal FPBalance);
+
+	/** Get FP Balance	  */
+	public BigDecimal getFPBalance();
+
+    /** Column name FourtyPresent */
+    public static final String COLUMNNAME_FourtyPresent = "FourtyPresent";
+
+	/** Set Fourty Present	  */
+	public void setFourtyPresent (BigDecimal FourtyPresent);
+
+	/** Get Fourty Present	  */
+	public BigDecimal getFourtyPresent();
+
     /** Column name GrantedDate */
     public static final String COLUMNNAME_GrantedDate = "GrantedDate";
 
@@ -230,6 +248,8 @@ public interface I_HR_Loan
 	/** Get Interest Attribute	  */
 	public int getInterestAttribute_ID();
 
+	public org.eevolution.model.I_HR_Attribute getInterestAttribute() throws RuntimeException;
+
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
 
@@ -242,6 +262,19 @@ public interface I_HR_Loan
 	  * The record is active in the system
 	  */
 	public boolean isActive();
+
+    /** Column name IsValid */
+    public static final String COLUMNNAME_IsValid = "IsValid";
+
+	/** Set Valid.
+	  * Element is valid
+	  */
+	public void setIsValid (boolean IsValid);
+
+	/** Get Valid.
+	  * Element is valid
+	  */
+	public boolean isValid();
 
     /** Column name LoanAmount */
     public static final String COLUMNNAME_LoanAmount = "LoanAmount";
@@ -282,6 +315,24 @@ public interface I_HR_Loan
 	  * The document has been processed
 	  */
 	public boolean isProcessed();
+
+    /** Column name TotalDeduction */
+    public static final String COLUMNNAME_TotalDeduction = "TotalDeduction";
+
+	/** Set Total Deduction	  */
+	public void setTotalDeduction (BigDecimal TotalDeduction);
+
+	/** Get Total Deduction	  */
+	public BigDecimal getTotalDeduction();
+
+    /** Column name TotalEarnings */
+    public static final String COLUMNNAME_TotalEarnings = "TotalEarnings";
+
+	/** Set TotalEarnings	  */
+	public void setTotalEarnings (BigDecimal TotalEarnings);
+
+	/** Get TotalEarnings	  */
+	public BigDecimal getTotalEarnings();
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";

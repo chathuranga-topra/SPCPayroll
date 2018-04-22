@@ -497,8 +497,17 @@ public class MHRProcess extends X_HR_Process implements DocAction
 		//	Can we delete posting
 		MPeriod.testPeriodOpen(getCtx(), getDateAcct(), MPeriodControl.DOCBASETYPE_Payroll, getAD_Org_ID());
 		
+		//if the last installment paid, It should be kept as complete loan not the close mode
+		String sql = " update hr_loan set docstatus = 'CO', docaction='CL' where   hr_loan_id IN ( " + 
+				" select distinct hr_loan_id from HR_LoanSchedule " + 
+				" WHERE HR_LOANSCHEDULE_ID IN (SELECT HR_LOANSCHEDULE_ID  FROM HR_LoanSchedule WHERE  HR_Movement_ID IN( " + 
+				" SELECT HR_Movement_ID FROM  HR_Movement WHERE HR_Process_ID = "+this.get_ID()+" ) " + 
+				" OR INTERESTMOVEMENT_ID IN (SELECT HR_Movement_ID FROM  HR_Movement WHERE HR_Process_ID = ?))) " + 
+				" AND docstatus = 'CL' AND docaction='--' ";
+		
+		DB.executeUpdate(sql, this.get_ID(), get_TrxName());
 		//before delete movements, update loan schedule as no paid
-		String sql = "UPDATE HR_LoanSchedule SET "
+		sql = " UPDATE HR_LoanSchedule SET "
 			+ " ISPAID =  'N' , PROCESSED = 'N' , HR_MOVEMENT_ID = NULL , INTERESTMOVEMENT_ID = null "
 			+ " WHERE HR_LOANSCHEDULE_ID IN (SELECT HR_LOANSCHEDULE_ID "
 			+ " FROM HR_LoanSchedule WHERE "

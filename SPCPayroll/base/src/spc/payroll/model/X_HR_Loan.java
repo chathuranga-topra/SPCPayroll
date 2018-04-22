@@ -33,7 +33,7 @@ public class X_HR_Loan extends PO implements I_HR_Loan, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20180410L;
+	private static final long serialVersionUID = 20180420L;
 
     /** Standard Constructor */
     public X_HR_Loan (Properties ctx, int HR_Loan_ID, String trxName)
@@ -264,6 +264,40 @@ public class X_HR_Loan extends PO implements I_HR_Loan, I_Persistent
 		return (String)get_Value(COLUMNNAME_DocumentNo);
 	}
 
+	/** Set FP Balance.
+		@param FPBalance FP Balance	  */
+	public void setFPBalance (BigDecimal FPBalance)
+	{
+		set_Value (COLUMNNAME_FPBalance, FPBalance);
+	}
+
+	/** Get FP Balance.
+		@return FP Balance	  */
+	public BigDecimal getFPBalance () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_FPBalance);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Fourty Present.
+		@param FourtyPresent Fourty Present	  */
+	public void setFourtyPresent (BigDecimal FourtyPresent)
+	{
+		set_Value (COLUMNNAME_FourtyPresent, FourtyPresent);
+	}
+
+	/** Get Fourty Present.
+		@return Fourty Present	  */
+	public BigDecimal getFourtyPresent () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_FourtyPresent);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
 	/** Set GrantedDate.
 		@param GrantedDate GrantedDate	  */
 	public void setGrantedDate (Timestamp GrantedDate)
@@ -368,6 +402,11 @@ public class X_HR_Loan extends PO implements I_HR_Loan, I_Persistent
 		return ii.intValue();
 	}
 
+	public org.eevolution.model.I_HR_Attribute getInterestAttribute() throws RuntimeException
+    {
+		return (org.eevolution.model.I_HR_Attribute)MTable.get(getCtx(), org.eevolution.model.I_HR_Attribute.Table_Name)
+			.getPO(getInterestAttribute_ID(), get_TrxName());	}
+
 	/** Set Interest Attribute.
 		@param InterestAttribute_ID Interest Attribute	  */
 	public void setInterestAttribute_ID (int InterestAttribute_ID)
@@ -386,6 +425,30 @@ public class X_HR_Loan extends PO implements I_HR_Loan, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Valid.
+		@param IsValid 
+		Element is valid
+	  */
+	public void setIsValid (boolean IsValid)
+	{
+		set_Value (COLUMNNAME_IsValid, Boolean.valueOf(IsValid));
+	}
+
+	/** Get Valid.
+		@return Element is valid
+	  */
+	public boolean isValid () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsValid);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
 	}
 
 	/** Set LoanAmount.
@@ -454,5 +517,39 @@ public class X_HR_Loan extends PO implements I_HR_Loan, I_Persistent
 			return "Y".equals(oo);
 		}
 		return false;
+	}
+
+	/** Set Total Deduction.
+		@param TotalDeduction Total Deduction	  */
+	public void setTotalDeduction (BigDecimal TotalDeduction)
+	{
+		set_Value (COLUMNNAME_TotalDeduction, TotalDeduction);
+	}
+
+	/** Get Total Deduction.
+		@return Total Deduction	  */
+	public BigDecimal getTotalDeduction () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_TotalDeduction);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set TotalEarnings.
+		@param TotalEarnings TotalEarnings	  */
+	public void setTotalEarnings (BigDecimal TotalEarnings)
+	{
+		set_Value (COLUMNNAME_TotalEarnings, TotalEarnings);
+	}
+
+	/** Get TotalEarnings.
+		@return TotalEarnings	  */
+	public BigDecimal getTotalEarnings () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_TotalEarnings);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
 	}
 }

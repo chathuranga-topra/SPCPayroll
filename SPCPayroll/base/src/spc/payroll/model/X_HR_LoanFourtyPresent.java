@@ -23,30 +23,29 @@ import java.util.Properties;
 import org.compiere.model.*;
 import org.compiere.util.Env;
 
-/** Generated Model for HR_LoanTypeFactors
+/** Generated Model for HR_LoanFourtyPresent
  *  @author Adempiere (generated) 
  *  @version Release 3.8.0 - $Id$ */
-public class X_HR_LoanTypeFactors extends PO implements I_HR_LoanTypeFactors, I_Persistent 
+public class X_HR_LoanFourtyPresent extends PO implements I_HR_LoanFourtyPresent, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20180420L;
+	private static final long serialVersionUID = 20180422L;
 
     /** Standard Constructor */
-    public X_HR_LoanTypeFactors (Properties ctx, int HR_LoanTypeFactors_ID, String trxName)
+    public X_HR_LoanFourtyPresent (Properties ctx, int HR_LoanFourtyPresent_ID, String trxName)
     {
-      super (ctx, HR_LoanTypeFactors_ID, trxName);
-      /** if (HR_LoanTypeFactors_ID == 0)
+      super (ctx, HR_LoanFourtyPresent_ID, trxName);
+      /** if (HR_LoanFourtyPresent_ID == 0)
         {
-			setHR_Concept_ID (0);
-			setHR_LoanTypeFactors_ID (0);
+			setHR_LoanFourtyPresent_ID (0);
         } */
     }
 
     /** Load Constructor */
-    public X_HR_LoanTypeFactors (Properties ctx, ResultSet rs, String trxName)
+    public X_HR_LoanFourtyPresent (Properties ctx, ResultSet rs, String trxName)
     {
       super (ctx, rs, trxName);
     }
@@ -68,10 +67,47 @@ public class X_HR_LoanTypeFactors extends PO implements I_HR_LoanTypeFactors, I_
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_HR_LoanTypeFactors[")
+      StringBuffer sb = new StringBuffer ("X_HR_LoanFourtyPresent[")
         .append(get_ID()).append("]");
       return sb.toString();
     }
+
+	/** Set Amount.
+		@param Amount 
+		Amount in a defined currency
+	  */
+	public void setAmount (BigDecimal Amount)
+	{
+		set_Value (COLUMNNAME_Amount, Amount);
+	}
+
+	/** Get Amount.
+		@return Amount in a defined currency
+	  */
+	public BigDecimal getAmount () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_Amount);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Description.
+		@param Description 
+		Optional short description of the record
+	  */
+	public void setDescription (String Description)
+	{
+		set_Value (COLUMNNAME_Description, Description);
+	}
+
+	/** Get Description.
+		@return Optional short description of the record
+	  */
+	public String getDescription () 
+	{
+		return (String)get_Value(COLUMNNAME_Description);
+	}
 
 	public org.eevolution.model.I_HR_Concept_Category getHR_Concept_Category() throws RuntimeException
     {
@@ -101,109 +137,86 @@ public class X_HR_LoanTypeFactors extends PO implements I_HR_LoanTypeFactors, I_
 		return ii.intValue();
 	}
 
-	public org.eevolution.model.I_HR_Concept getHR_Concept() throws RuntimeException
+	/** Set HR_LoanFourtyPresent ID.
+		@param HR_LoanFourtyPresent_ID HR_LoanFourtyPresent ID	  */
+	public void setHR_LoanFourtyPresent_ID (int HR_LoanFourtyPresent_ID)
+	{
+		if (HR_LoanFourtyPresent_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_HR_LoanFourtyPresent_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_HR_LoanFourtyPresent_ID, Integer.valueOf(HR_LoanFourtyPresent_ID));
+	}
+
+	/** Get HR_LoanFourtyPresent ID.
+		@return HR_LoanFourtyPresent ID	  */
+	public int getHR_LoanFourtyPresent_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_HR_LoanFourtyPresent_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set HR_Loan ID.
+		@param HR_Loan_ID HR_Loan ID	  */
+	public void setHR_Loan_ID (int HR_Loan_ID)
+	{
+		if (HR_Loan_ID < 1) 
+			set_Value (COLUMNNAME_HR_Loan_ID, null);
+		else 
+			set_Value (COLUMNNAME_HR_Loan_ID, Integer.valueOf(HR_Loan_ID));
+	}
+
+	/** Get HR_Loan ID.
+		@return HR_Loan ID	  */
+	public int getHR_Loan_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_HR_Loan_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.eevolution.model.I_HR_Movement getHR_Movement() throws RuntimeException
     {
-		return (org.eevolution.model.I_HR_Concept)MTable.get(getCtx(), org.eevolution.model.I_HR_Concept.Table_Name)
-			.getPO(getHR_Concept_ID(), get_TrxName());	}
+		return (org.eevolution.model.I_HR_Movement)MTable.get(getCtx(), org.eevolution.model.I_HR_Movement.Table_Name)
+			.getPO(getHR_Movement_ID(), get_TrxName());	}
 
-	/** Set Payroll Concept.
-		@param HR_Concept_ID 
-		The Payroll Concept allows to define all the perception and deductions elements needed to define a payroll.
-	  */
-	public void setHR_Concept_ID (int HR_Concept_ID)
+	/** Set Payroll Movement.
+		@param HR_Movement_ID Payroll Movement	  */
+	public void setHR_Movement_ID (int HR_Movement_ID)
 	{
-		if (HR_Concept_ID < 1) 
-			set_Value (COLUMNNAME_HR_Concept_ID, null);
+		if (HR_Movement_ID < 1) 
+			set_Value (COLUMNNAME_HR_Movement_ID, null);
 		else 
-			set_Value (COLUMNNAME_HR_Concept_ID, Integer.valueOf(HR_Concept_ID));
+			set_Value (COLUMNNAME_HR_Movement_ID, Integer.valueOf(HR_Movement_ID));
 	}
 
-	/** Get Payroll Concept.
-		@return The Payroll Concept allows to define all the perception and deductions elements needed to define a payroll.
-	  */
-	public int getHR_Concept_ID () 
+	/** Get Payroll Movement.
+		@return Payroll Movement	  */
+	public int getHR_Movement_ID () 
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_HR_Concept_ID);
+		Integer ii = (Integer)get_Value(COLUMNNAME_HR_Movement_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
 	}
 
-	/** Set HR_LoanTypeFactors ID.
-		@param HR_LoanTypeFactors_ID HR_LoanTypeFactors ID	  */
-	public void setHR_LoanTypeFactors_ID (int HR_LoanTypeFactors_ID)
-	{
-		if (HR_LoanTypeFactors_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_HR_LoanTypeFactors_ID, null);
-		else 
-			set_ValueNoCheck (COLUMNNAME_HR_LoanTypeFactors_ID, Integer.valueOf(HR_LoanTypeFactors_ID));
-	}
-
-	/** Get HR_LoanTypeFactors ID.
-		@return HR_LoanTypeFactors ID	  */
-	public int getHR_LoanTypeFactors_ID () 
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_HR_LoanTypeFactors_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	/** Set LoanType.
-		@param HR_LoanType_ID LoanType	  */
-	public void setHR_LoanType_ID (int HR_LoanType_ID)
-	{
-		if (HR_LoanType_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_HR_LoanType_ID, null);
-		else 
-			set_ValueNoCheck (COLUMNNAME_HR_LoanType_ID, Integer.valueOf(HR_LoanType_ID));
-	}
-
-	/** Get LoanType.
-		@return LoanType	  */
-	public int getHR_LoanType_ID () 
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_HR_LoanType_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	/** Set Percentage %.
-		@param Percentage 
-		Percent of the entire amount
+	/** Set Name.
+		@param Name 
+		Alphanumeric identifier of the entity
 	  */
-	public void setPercentage (BigDecimal Percentage)
+	public void setName (String Name)
 	{
-		set_Value (COLUMNNAME_Percentage, Percentage);
+		set_Value (COLUMNNAME_Name, Name);
 	}
 
-	/** Get Percentage %.
-		@return Percent of the entire amount
+	/** Get Name.
+		@return Alphanumeric identifier of the entity
 	  */
-	public BigDecimal getPercentage () 
+	public String getName () 
 	{
-		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_Percentage);
-		if (bd == null)
-			 return Env.ZERO;
-		return bd;
-	}
-
-	/** Set Remarks.
-		@param Remarks 
-		Remarks
-	  */
-	public void setRemarks (String Remarks)
-	{
-		set_Value (COLUMNNAME_Remarks, Remarks);
-	}
-
-	/** Get Remarks.
-		@return Remarks
-	  */
-	public String getRemarks () 
-	{
-		return (String)get_Value(COLUMNNAME_Remarks);
+		return (String)get_Value(COLUMNNAME_Name);
 	}
 
 	/** Set Sequence.

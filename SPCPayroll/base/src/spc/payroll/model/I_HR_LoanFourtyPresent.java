@@ -21,17 +21,17 @@ import java.sql.Timestamp;
 import org.compiere.model.*;
 import org.compiere.util.KeyNamePair;
 
-/** Generated Interface for HR_LoanTypeFactors
+/** Generated Interface for HR_LoanFourtyPresent
  *  @author Adempiere (generated) 
  *  @version Release 3.8.0
  */
-public interface I_HR_LoanTypeFactors 
+public interface I_HR_LoanFourtyPresent 
 {
 
-    /** TableName=HR_LoanTypeFactors */
-    public static final String Table_Name = "HR_LoanTypeFactors";
+    /** TableName=HR_LoanFourtyPresent */
+    public static final String Table_Name = "HR_LoanFourtyPresent";
 
-    /** AD_Table_ID=1000022 */
+    /** AD_Table_ID=1000023 */
     public static final int Table_ID = MTable.getTable_ID(Table_Name);
 
     KeyNamePair Model = new KeyNamePair(Table_ID, Table_Name);
@@ -63,6 +63,19 @@ public interface I_HR_LoanTypeFactors
 	  */
 	public int getAD_Org_ID();
 
+    /** Column name Amount */
+    public static final String COLUMNNAME_Amount = "Amount";
+
+	/** Set Amount.
+	  * Amount in a defined currency
+	  */
+	public void setAmount (BigDecimal Amount);
+
+	/** Get Amount.
+	  * Amount in a defined currency
+	  */
+	public BigDecimal getAmount();
+
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
 
@@ -79,6 +92,19 @@ public interface I_HR_LoanTypeFactors
 	  */
 	public int getCreatedBy();
 
+    /** Column name Description */
+    public static final String COLUMNNAME_Description = "Description";
+
+	/** Set Description.
+	  * Optional short description of the record
+	  */
+	public void setDescription (String Description);
+
+	/** Get Description.
+	  * Optional short description of the record
+	  */
+	public String getDescription();
+
     /** Column name HR_Concept_Category_ID */
     public static final String COLUMNNAME_HR_Concept_Category_ID = "HR_Concept_Category_ID";
 
@@ -94,38 +120,34 @@ public interface I_HR_LoanTypeFactors
 
 	public org.eevolution.model.I_HR_Concept_Category getHR_Concept_Category() throws RuntimeException;
 
-    /** Column name HR_Concept_ID */
-    public static final String COLUMNNAME_HR_Concept_ID = "HR_Concept_ID";
+    /** Column name HR_LoanFourtyPresent_ID */
+    public static final String COLUMNNAME_HR_LoanFourtyPresent_ID = "HR_LoanFourtyPresent_ID";
 
-	/** Set Payroll Concept.
-	  * The Payroll Concept allows to define all the perception and deductions elements needed to define a payroll.
-	  */
-	public void setHR_Concept_ID (int HR_Concept_ID);
+	/** Set HR_LoanFourtyPresent ID	  */
+	public void setHR_LoanFourtyPresent_ID (int HR_LoanFourtyPresent_ID);
 
-	/** Get Payroll Concept.
-	  * The Payroll Concept allows to define all the perception and deductions elements needed to define a payroll.
-	  */
-	public int getHR_Concept_ID();
+	/** Get HR_LoanFourtyPresent ID	  */
+	public int getHR_LoanFourtyPresent_ID();
 
-	public org.eevolution.model.I_HR_Concept getHR_Concept() throws RuntimeException;
+    /** Column name HR_Loan_ID */
+    public static final String COLUMNNAME_HR_Loan_ID = "HR_Loan_ID";
 
-    /** Column name HR_LoanTypeFactors_ID */
-    public static final String COLUMNNAME_HR_LoanTypeFactors_ID = "HR_LoanTypeFactors_ID";
+	/** Set HR_Loan ID	  */
+	public void setHR_Loan_ID (int HR_Loan_ID);
 
-	/** Set HR_LoanTypeFactors ID	  */
-	public void setHR_LoanTypeFactors_ID (int HR_LoanTypeFactors_ID);
+	/** Get HR_Loan ID	  */
+	public int getHR_Loan_ID();
 
-	/** Get HR_LoanTypeFactors ID	  */
-	public int getHR_LoanTypeFactors_ID();
+    /** Column name HR_Movement_ID */
+    public static final String COLUMNNAME_HR_Movement_ID = "HR_Movement_ID";
 
-    /** Column name HR_LoanType_ID */
-    public static final String COLUMNNAME_HR_LoanType_ID = "HR_LoanType_ID";
+	/** Set Payroll Movement	  */
+	public void setHR_Movement_ID (int HR_Movement_ID);
 
-	/** Set LoanType	  */
-	public void setHR_LoanType_ID (int HR_LoanType_ID);
+	/** Get Payroll Movement	  */
+	public int getHR_Movement_ID();
 
-	/** Get LoanType	  */
-	public int getHR_LoanType_ID();
+	public org.eevolution.model.I_HR_Movement getHR_Movement() throws RuntimeException;
 
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
@@ -140,31 +162,18 @@ public interface I_HR_LoanTypeFactors
 	  */
 	public boolean isActive();
 
-    /** Column name Percentage */
-    public static final String COLUMNNAME_Percentage = "Percentage";
+    /** Column name Name */
+    public static final String COLUMNNAME_Name = "Name";
 
-	/** Set Percentage %.
-	  * Percent of the entire amount
+	/** Set Name.
+	  * Alphanumeric identifier of the entity
 	  */
-	public void setPercentage (BigDecimal Percentage);
+	public void setName (String Name);
 
-	/** Get Percentage %.
-	  * Percent of the entire amount
+	/** Get Name.
+	  * Alphanumeric identifier of the entity
 	  */
-	public BigDecimal getPercentage();
-
-    /** Column name Remarks */
-    public static final String COLUMNNAME_Remarks = "Remarks";
-
-	/** Set Remarks.
-	  * Remarks
-	  */
-	public void setRemarks (String Remarks);
-
-	/** Get Remarks.
-	  * Remarks
-	  */
-	public String getRemarks();
+	public String getName();
 
     /** Column name SeqNo */
     public static final String COLUMNNAME_SeqNo = "SeqNo";
