@@ -25,6 +25,7 @@ import org.compiere.util.Env;
 import org.compiere.util.Trx;
 import org.eevolution.model.MHRAttribute;
 import org.eevolution.model.MHRConcept;
+import org.eevolution.model.MHREmployee;
 import org.eevolution.model.MHRMovement;
 
 import com.sun.corba.ee.impl.orbutil.fsm.GuardedAction;
@@ -44,19 +45,13 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 	
 	protected boolean beforeSave(boolean newRecord){
 		
+		//MHREmployee
 		
 		//validate duplicate loans opening
 		this.validateDuplicate();
-		//validation for fastival advance for current year opening more than one
-		this.validateFastivalAdvance();
-		//Salary advance : one for one month
-		if(getHR_LoanType_ID() == 1000012){
-			//one month can get only one sallary advance
-			
-		}
 		
 		//basic sallary :: concept is hard corded
-		MHRConcept basicSallaryConcept = new MHRConcept(getCtx(), 1000001, this.get_TrxName());
+		MHRConcept basicSallaryConcept = new MHRConcept(getCtx(), HardCodedVal.hr_LoanType_idBasicsalary, this.get_TrxName());
 		//no basic sallary
 		if(basicSallaryConcept == null || basicSallaryConcept.get_ID() == 0){
 			throw new AdempiereException("Process failed : canot find basic sallary concept : HR_Concept_ID " + 1000001);
@@ -98,6 +93,16 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 		//validate for interrest attribute with loan type interest attribute
 		if(getHR_LoanType().getInterestConcept_ID() == 0){ //no interest attribute
 			setInterestAttribute_ID(0);
+		}
+		
+		//validation for festival advance for current year opening more than one
+		if(this.getHR_LoanType_ID() == HardCodedVal.hr_LoanType_idFestivalAdvance){
+			this.validateFastivalAdvance();
+		}
+		
+		//salary advance : one for one month
+		if(getHR_LoanType_ID() == HardCodedVal.hr_LoanType_idSalaryAdvance){
+			this.validateSallaryAdvance();
 		}
 		
 		return true;
@@ -202,7 +207,10 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 			//there can be loans which is not validated the 40 %
 			setIsValid(getFourtyPresent().doubleValue() == 0.00);
 		
-		//this.save();
+		if(!isValid()) {
+			sql = "update HR_Loan set isvalid = 'N' where hr_loan_id = ?";
+			DB.executeUpdate(sql, get_ID(), trx.getTrxName());
+		}	
 		
 		trx.commit();trx.close();
 		
@@ -235,6 +243,7 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 		
 		this.setGrantedDate(new Timestamp(System.currentTimeMillis()));
 		
+		
 		//create a concept atribute for particulart employee
 		//If interest for separate concept
 		if(getHR_LoanType().getInterestConcept_ID() > 0){
@@ -260,13 +269,26 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 		atribute.set_ValueOfColumn("processed", "Y");
 		atribute.save();
 		
+		//set capitle atribute
+		setHR_Attribute_ID(atribute.get_ID());
+		
+		long dayDiff = getPayrollEffectiveDate().getTime() - getGrantedDate().getTime();
+		dayDiff = dayDiff/1000/60/60/24;
+		
+		//interest for date between payroll effective date and loan  granted date
+		double arreasInterest = getLoanAmount().doubleValue() * getHR_LoanType().getRate().doubleValue() / 100.00/365.00 * dayDiff;
+		
+		//adjust the first month interest from granted date and payroll effective date
+		int HR_LoanSchedule_ID = MHRLoanSchedule.getAllIDs(MHRLoanSchedule.Table_Name, "SeqNo=1 AND HR_Loan_ID = " + get_ID(), get_TrxName())[0];
+		MHRLoanSchedule sc = new MHRLoanSchedule(getCtx(), HR_LoanSchedule_ID, get_TrxName());
+		
+		sc.setInterestAmt(sc.getInterestAmt().add(new BigDecimal(arreasInterest).setScale(2, RoundingMode.HALF_UP)));
+		sc.save();
+		
 		setDocStatus("CO");
 		setDocAction("CL");
 		setProcessed(true);
 		save();
-		//set capitle atribute
-		setHR_Attribute_ID(atribute.get_ID());
-		setGrantedDate(new Timestamp(System.currentTimeMillis()));
 		
 		String sql = "update HR_LoanGurantee set processed = 'Y' where hr_loan_id = ?";
 		DB.executeUpdate(sql, get_ID(), get_TrxName());
@@ -464,19 +486,50 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 	
 	private void validateFastivalAdvance(){
 		
-		//one year can get only one fastival advance
+		//one year can get only one Festival advance
+		String sql = "SELECT NVL(CASE WHEN EXTRACT (YEAR FROM GRANTEDDATE) = EXTRACT (YEAR FROM CURRENT_DATE)THEN"
+		+ " CAST (DOCUMENTNO AS VARCHAR(12)) ELSE 'N' END , 'N') FROM HR_Loan WHERE C_BPartner_ID = ? "
+		+ " AND HR_LoanType_ID = ? AND HR_LOAN_ID NOT IN (?)"
+		+ " AND AD_Client_ID = ? ";
 		
-		if(this.getHR_LoanType_ID() == 1000006){ // loan type is hard corded
-			String sql = "SELECT NVL(CASE WHEN EXTRACT (YEAR FROM GRANTEDDATE) = EXTRACT (YEAR FROM CURRENT_DATE)THEN"
-			+ " CAST (DOCUMENTNO AS VARCHAR(12)) ELSE 'N' END , 'N') FROM HR_Loan WHERE C_BPartner_ID = ? "
-			+ " AND HR_LoanType_ID = ? AND HR_LOAN_ID NOT IN (?)"
-			+ " AND AD_Client_ID = ? ";
+		String res = DB.getSQLValueString(get_TrxName(), sql, getC_BPartner_ID() , getHR_LoanType_ID() , get_ID() , getAD_Client_ID());
+		
+		if(!(res == null || res.equalsIgnoreCase("N")))
+			throw new AdempiereException("Duplicate advance! ~ Document No - " + res);
+	
+	}
+	
+	private void validateSallaryAdvance() {
+		
+		//salary advance can be grant 50 of selected earnings
+		
+		String sql = "SELECT sum(m.amount * f.percentage / 100) as totalearnings " + 
+		"FROM  HR_LoanMaxAmtFactors f " + 
+		"inner join hr_movement m on f.hr_concept_id = m.hr_concept_id " + 
+		"where f.HR_LoanType_ID=? " + 
+		"and m.c_bpartner_id = ? " + 
+		"and f.isactive = 'Y' " + 
+		"and m.hr_process_id = ? ";
+		
+		int latsHrProcessId = getLastPayrollProcessId(get_TrxName());
+		if(latsHrProcessId == -1)
+			throw new AdempiereException("No previous payroll movements found -process failed");
+		
+		BigDecimal val = DB.getSQLValueBD(get_TrxName(), sql, getHR_LoanType_ID() , getC_BPartner_ID() ,latsHrProcessId);
+		
+		if(val.doubleValue() < getLoanAmount().doubleValue()) {
 			
-			String res = DB.getSQLValueString(get_TrxName(), sql, getC_BPartner_ID() , getHR_LoanType_ID() , get_ID() , getAD_Client_ID());
-			
-			if(!(res == null || res.equalsIgnoreCase("N")))
-				throw new AdempiereException("Duplicate advance! ~ Document No - " + res);
+			throw new AdempiereException("Excess loan amount  : " + val + "  >= " + "Loan amount - " + getLoanAmount());
 		}
+	}
+	
+	private int getLastPayrollProcessId(String trxName) {
+		
+		String sql = "select p.hr_process_id from  HR_Process p " + 
+			"inner join HR_Movement m on p.hr_process_id = m.hr_process_id " + 
+			"where m.c_bpartner_id = ?  and p.docstatus IN ('CO' , 'CL') fetch first 1 rows only";
+		
+		return DB.getSQLValue(trxName, sql, this.getC_BPartner_ID());
 	}
 	
 	private void createFourtyPresentLines(Trx trx) {
@@ -486,11 +539,8 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 		String sql = "delete from HR_LoanFourtyPresent where HR_Loan_ID = ?";
 		DB.executeUpdate(sql, get_ID(), trx.getTrxName());
 		
- 		sql = "select p.hr_process_id from  HR_Process p " + 
-			"inner join HR_Movement m on p.hr_process_id = m.hr_process_id " + 
-			"where m.c_bpartner_id = ?  and p.docstatus IN ('CO' , 'CL') fetch first 1 rows only";
-		
-		int latsHrProcessId = DB.getSQLValue(trx.getTrxName(), sql, this.getC_BPartner_ID());
+		//last payroll process id
+		int latsHrProcessId = getLastPayrollProcessId(trx.getTrxName());
 		
 		if(latsHrProcessId == -1)
 			throw new AdempiereException("No previous payroll movements found - 40 present validation failed");
@@ -585,8 +635,5 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 			}
 		
 		}catch(Exception ex) { throw new AdempiereException(ex.getMessage());}
-		
-		
 	}
-	
 }
