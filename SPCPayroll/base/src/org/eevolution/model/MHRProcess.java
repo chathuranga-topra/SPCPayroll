@@ -17,6 +17,7 @@ package org.eevolution.model;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -52,6 +53,7 @@ import org.compiere.util.TimeUtil;
 
 import spc.payroll.model.MHRLoan;
 import spc.payroll.model.MHRLoanSchedule;
+import spc.payroll.model.MHROTLine;
 
 /**
  * HR Process Model
@@ -1017,12 +1019,61 @@ public class MHRProcess extends X_HR_Process implements DocAction
 					}catch(Exception ex){
 						ADialog.error(0, null, ex.getMessage());
 					}
-					
 				}
 			}
 			
-		} // for each employee
-		//
+		}
+		
+		String sql = "select distinct l.hr_otline_id from HR_OTLine l " + 
+		"inner join hr_ot ot on ot.hr_ot_id = l.hr_ot_id " + 
+		"inner join hr_process p on p.hr_process_id = ot.hr_process_id " + 
+		"inner join hr_movement mov on mov.hr_process_id = p.hr_process_id " + 
+		"and l.c_bpartner_id = mov.c_bpartner_id " + 
+		"and p.hr_process_id = ? " + 
+		"and ot.docstatus = 'CO'";
+		
+		PreparedStatement psmt = null; ResultSet rs = null;
+		
+		//create Over time
+		try {
+			
+			psmt = DB.prepareStatement(sql, get_TrxName());
+			psmt.setInt(1, this.get_ID());
+			
+			rs = psmt.executeQuery();
+			
+			MHROTLine line = null;
+			MHRMovement otl = null;
+			MHRAttribute atr = null;
+			
+			while(rs.next()) {
+				
+				line = new MHROTLine(getCtx(), rs.getInt("hr_otline_id"), get_TrxName());
+				atr = new MHRAttribute(getCtx(), line.getOTAtrribute_ID() , get_TrxName());
+				
+				otl = createMovementFromConcept((MHRConcept)atr.getHR_Concept(), true);
+				otl.setHR_Concept_ID(atr.getHR_Concept_ID());
+				otl.setHR_Payroll_ID(this.getHR_Payroll_ID());
+				otl.setAmount(line.getTotalOTAmt());
+				otl.save();
+				
+				if(line.isMeal()) {
+					atr = new MHRAttribute(getCtx(), line.getMealAtrribute_ID() , get_TrxName());
+					
+					otl = createMovementFromConcept((MHRConcept)atr.getHR_Concept(), true);
+					otl.setHR_Concept_ID(atr.getHR_Concept_ID());
+					otl.setHR_Payroll_ID(this.getHR_Payroll_ID());
+					otl.setAmount(line.getMealAllowance());
+					otl.save();
+				}
+			}
+			
+		}catch(Exception ex) {
+			DB.close(rs, psmt);
+			psmt = null; rs = null;
+			throw new AdempiereException(ex.getMessage());
+		}
+		
 		// Save period & finish
 		if(getHR_Period_ID()>0)
 		{

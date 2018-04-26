@@ -74,7 +74,7 @@ public class MHREmployee extends X_HR_Employee
 			MHRAttribute atr = null;
 			if(getHR_OtCategory_ID() != 0) {
 				
-				//create new payroll attribute
+				//create new OT payroll attribute
 				atr = new MHRAttribute(getCtx(), 0, get_TrxName());
 				atr.setC_BPartner_ID(getC_BPartner_ID());
 				atr.setHR_Concept_ID(otc.getHR_Concept_ID());
@@ -82,6 +82,7 @@ public class MHREmployee extends X_HR_Employee
 				atr.setHR_Employee_ID(getHR_Employee_ID());
 				atr.setColumnType("A");
 				atr.save();
+				
 			}
 			
 			if(get_ValueOldAsInt(COLUMNNAME_HR_OtCategory_ID) != 0) { // delete previous records

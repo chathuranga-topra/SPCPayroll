@@ -54,7 +54,7 @@ public class CreateOTLines extends SvrProcess{
 		"and emp.hr_otcategory_id = ?" +
 		"and atr.hr_concept_id = ? " +
 		"and bp.isactive = 'Y' " + 
-		"and emp.c_bpartner_id not in(select c_bpartner_id from HR_OTLine  where hr_ot_id = ?) ";
+		"and emp.c_bpartner_id not in(select c_bpartner_id from HR_OTLine  where hr_ot_id = ?)";
 		
 		if(HR_Department_ID!=0)
 			sql +=" and dept.HR_Department_ID = " + HR_Department_ID;
@@ -69,6 +69,7 @@ public class CreateOTLines extends SvrProcess{
 			"order by bp.value";
 		
 		PreparedStatement psmt = null; ResultSet rs = null;
+		int i = 0;
 		
 		try {
 			
@@ -87,13 +88,15 @@ public class CreateOTLines extends SvrProcess{
 				 ol.setOTAtrribute_ID(rs.getInt("hr_attribute_id"));
 				 
 				 ol.save();
+				 
+				 i++;
 			}
 			
 		}catch(Exception ex) {
 			ex.printStackTrace();
 		}
 			
-		return "Done!";
+		return "Line created - " + i;
 	}
 
 }
