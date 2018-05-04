@@ -94,12 +94,12 @@ public class MHRNoPayLine extends X_HR_NoPayLine{
 				npa.setBaseAmt(rs.getBigDecimal("amount"));
 				npa.setNoOfDays(getNoOfDays());
 				//setup day rate
-				npa.setDayRate(rs.getBigDecimal("amount").divide(new BigDecimal(noPay.getMonthWorkDays())).setScale(2, RoundingMode.HALF_UP));
+				npa.setDayRate(rs.getBigDecimal("amount").divide(new BigDecimal(noPay.getMonthWorkDays()) , 2 , RoundingMode.HALF_UP).setScale(2, RoundingMode.HALF_UP));
+				
 				//set deduction
 				npa.setDeduction(npa.getDayRate().multiply(getNoOfDays()).setScale(2, RoundingMode.HALF_UP));
 				//set balance
 				npa.setBalance(npa.getBaseAmt().subtract(npa.getDeduction()));
-				
 				
 				//validate payroll attribute
 				sql = "C_BPartner_ID= "+npl.getC_BPartner_ID()+" "
@@ -112,8 +112,6 @@ public class MHRNoPayLine extends X_HR_NoPayLine{
 					attribute = new MHRAttribute(getCtx(), 0, get_TrxName());
 					attribute.setHR_Concept_ID(npa.getNoPayConcept_ID());
 					attribute.setC_BPartner_ID(npl.getC_BPartner_ID());
-					
-					
 					
 					//valid from current month 1st date
 					d =new Date(System.currentTimeMillis());

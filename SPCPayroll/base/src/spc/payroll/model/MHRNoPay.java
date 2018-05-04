@@ -89,19 +89,26 @@ public class MHRNoPay extends X_HR_NoPay implements DocAction , DocOptions {
 	@Override
 	public String completeIt() {
 		
-		System.out.println("complete : It");
+		setDocStatus("CO");
+		setDocAction("VO");
+		
+		setProcessed(true);
 		return null;
 	}
 
 	@Override
 	public boolean voidIt() {
-		System.out.println("voidIt");
+		
+		setDocStatus("VO");
+		setDocAction("--");
 		return false;
 	}
 
 	@Override
 	public boolean closeIt() {
-		System.out.println("closeIt");
+		setDocStatus("CL");
+		setDocAction("--");
+		
 		return false;
 	}
 
