@@ -1,11 +1,17 @@
 package spc.payroll.model;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.Properties;
 
 import org.adempiere.exceptions.AdempiereException;
+import org.compiere.model.MAttribute;
 import org.compiere.util.DB;
+import org.eevolution.model.MHRAttribute;
 
 public class MHRNoPayLine extends X_HR_NoPayLine{
 
@@ -20,6 +26,16 @@ public class MHRNoPayLine extends X_HR_NoPayLine{
 	}
 	
 	protected boolean beforeSave(boolean newRecord){
+	
+		//validate nopay date
+		if(getNoOfDays().intValue() == 0) {
+			throw new AdempiereException("Enter no pay days count!");
+		}
+		
+		//when changing day count
+		if(! (newRecord || getNoOfDays().intValue() == get_ValueOldAsInt(COLUMNNAME_NoOfDays))) {
+			this.changeNoOfDates(getNoOfDays());
+		}
 		
 		MHRNoPay noPay = new MHRNoPay(getCtx(), getHR_NoPay_ID(), get_TrxName());
 		//validate paroll movement lines are available
@@ -36,11 +52,11 @@ public class MHRNoPayLine extends X_HR_NoPayLine{
 			createNoPayAttributeLines(noPay);
 		}
 		
-		
 		return success;
 	}	//	afterSave
 	
-	//create attribues
+	//create attributes
+	@SuppressWarnings("deprecation")
 	private void createNoPayAttributeLines(MHRNoPay noPay) {
 		
 		String sql = "";
@@ -66,6 +82,7 @@ public class MHRNoPayLine extends X_HR_NoPayLine{
 			
 			MHRNoPayAttribute npa = null;
 			MHRNoPayLine npl = new MHRNoPayLine(getCtx(), get_ID(), get_TrxName());
+			MHRAttribute attribute = null;Date d = null; 
 			
 			while(rs.next()){
 				
@@ -75,12 +92,42 @@ public class MHRNoPayLine extends X_HR_NoPayLine{
 				npa.setHR_NoPayLine_ID(this.get_ID());
 				npa.setNoPayConcept_ID(rs.getInt("nopayconcept_id"));
 				npa.setBaseAmt(rs.getBigDecimal("amount"));
+				npa.setNoOfDays(getNoOfDays());
+				//setup day rate
+				npa.setDayRate(rs.getBigDecimal("amount").divide(new BigDecimal(noPay.getMonthWorkDays())).setScale(2, RoundingMode.HALF_UP));
+				//set deduction
+				npa.setDeduction(npa.getDayRate().multiply(getNoOfDays()).setScale(2, RoundingMode.HALF_UP));
+				//set balance
+				npa.setBalance(npa.getBaseAmt().subtract(npa.getDeduction()));
+				
+				
+				//validate payroll attribute
+				sql = "C_BPartner_ID= "+npl.getC_BPartner_ID()+" "
+					+ " and  HR_Concept_ID="+npa.getNoPayConcept_ID();
+				
+				int [] atr = MHRAttribute.getAllIDs(MHRAttribute.Table_Name, sql, get_TrxName());
+				
+				if(atr.length == 0) {
+					//create new payroll attribute
+					attribute = new MHRAttribute(getCtx(), 0, get_TrxName());
+					attribute.setHR_Concept_ID(npa.getNoPayConcept_ID());
+					attribute.setC_BPartner_ID(npl.getC_BPartner_ID());
+					
+					
+					
+					//valid from current month 1st date
+					d =new Date(System.currentTimeMillis());
+					d.setDate(1);
+					attribute.setValidFrom(new Timestamp(d.getTime()));
+					attribute.save();
+					npa.setHR_Attribute_ID(attribute.get_ID()); // last added one
+					
+				}else {
+					npa.setHR_Attribute_ID(atr[atr.length - 1]); // last added one
+				}
 				
 				npa.save();
-				
-				System.out.println(npa + " " +  get_ID() + "");
-				
-			}	
+			}
 			
 		}catch(Exception ex) {
 			
@@ -89,9 +136,23 @@ public class MHRNoPayLine extends X_HR_NoPayLine{
 			DB.close(rs, psmt);
 			rs = null;psmt = null;
 		}
+	}
+	
+	private void changeNoOfDates(BigDecimal NoOfDays) {
 		
 		
+		int [] ii = MHRNoPayAttribute.getAllIDs(MHRNoPayAttribute.Table_Name, "HR_NoPayLine_ID = " + get_ID(), get_TrxName());
+		MHRNoPayAttribute npa = null;
 		
+		for(int i : ii) {
+			npa = new MHRNoPayAttribute(getCtx(),i, get_TrxName());
+			npa.setNoOfDays(NoOfDays);
+			//set deduction
+			npa.setDeduction(npa.getDayRate().multiply(NoOfDays).setScale(2, RoundingMode.HALF_UP));
+			//set balance
+			npa.setBalance(npa.getBaseAmt().subtract(npa.getDeduction()));
+			npa.save();
+		}
 	}
 	
 	//validate for current business partner has payroll movement in for particular process 
