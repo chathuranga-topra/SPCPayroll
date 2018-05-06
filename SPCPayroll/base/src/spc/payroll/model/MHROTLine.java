@@ -49,14 +49,16 @@ public class MHROTLine extends X_HR_OTLine{
 		//set OT rate
 		int basedConcept_ID = otc.get_ValueAsInt("BasedConcept_ID");
 		String stringRate = otc.getRate().replace('?', ' ');
-		//get basic sallary
-		String sql = "select NVL(amount "+stringRate+" , 0)  from HR_Attribute where hr_concept_id = ? "
-			+ " and c_bpartner_id = ?";
+		//get basic salary based on the payroll movements
+		String sql = "select NVL(amount "+stringRate+" , 0)  from HR_Movement where hr_concept_id = ? "
+			+ " and c_bpartner_id = ? AND HR_Process_ID = ?";
 		
-		BigDecimal rateAmt = DB.getSQLValueBD(get_TrxName(), sql,basedConcept_ID , getC_BPartner_ID());
+		BigDecimal rateAmt = DB.getSQLValueBD(get_TrxName(), sql,basedConcept_ID , getC_BPartner_ID() , ot.getHR_Process_ID());
 		
-		if(rateAmt == null)
+		if(rateAmt == null) {
 			rateAmt = new BigDecimal(0);
+			throw new AdempiereException("System can not calculate OT Hourly rate!");
+		}
 		
 		setRate(rateAmt);
 		setTotalOTAmt((getOTHours().multiply(rateAmt)).setScale(2, RoundingMode.HALF_UP));
@@ -66,23 +68,50 @@ public class MHROTLine extends X_HR_OTLine{
 		//set total line
 		setLineTotalAmt(getTotalOTAmt().add(getMealAllowance().setScale(2, RoundingMode.HALF_UP)));
 		
-		//validate meal attribute
-		String sqlWhere = " C_Bpartner_ID = "+getC_BPartner_ID() +" AND HR_Concept_ID = " + ot.getMealConcept_ID(); 
-		
-		int i [] = MHRAttribute.getAllIDs(MHRAttribute.Table_Name, sqlWhere, get_TrxName());
-		MHRAttribute mealAtr = null;
-		if(i.length == 0) { //No attribute create new Attribute
-			mealAtr = new MHRAttribute(getCtx(), 0, get_TrxName());
-			mealAtr.setC_BPartner_ID(getC_BPartner_ID());
-			mealAtr.setHR_Concept_ID(ot.getMealConcept_ID());
-			mealAtr.setHR_Employee_ID(emp.get_ID());
-			mealAtr.setValidFrom(new Timestamp(System.currentTimeMillis()));
-			mealAtr.setColumnType("A");
-			mealAtr.save();
-		}else {
-			mealAtr = new MHRAttribute(getCtx(), i[0], get_TrxName());
+		//set and validate OT attribute
+		if(getOTAtrribute_ID() == 0) {
+			sql = " C_Bpartner_ID = "+getC_BPartner_ID() +" AND HR_Concept_ID = " + ot.getHR_OtCategory().getHR_Concept_ID();
+			int i [] = MHRAttribute.getAllIDs(MHRAttribute.Table_Name, sql, get_TrxName());
+			
+			System.out.println("sql : " + sql);
+			 
+			MHRAttribute oTAtr = null;
+			if(i.length == 0) { //No attribute create new Attribute
+				oTAtr = new MHRAttribute(getCtx(), 0, get_TrxName());
+				oTAtr.setC_BPartner_ID(getC_BPartner_ID());
+				oTAtr.setHR_Concept_ID(ot.getHR_OtCategory().getHR_Concept_ID());
+				oTAtr.setHR_Employee_ID(emp.get_ID());
+				oTAtr.setValidFrom(new Timestamp(System.currentTimeMillis()));
+				oTAtr.setColumnType("A");
+				oTAtr.save();
+			}else {
+				oTAtr = new MHRAttribute(getCtx(), i[i.length -1], get_TrxName());
+			}
+			setOTAtrribute_ID(oTAtr.get_ID());
 		}
-		setMealAtrribute_ID(mealAtr.get_ID());
+		
+		
+		//set and validate meal attribute
+		if(getMealAtrribute_ID() == 0) {
+			
+			sql = " C_Bpartner_ID = "+getC_BPartner_ID() +" AND HR_Concept_ID = " + ot.getMealConcept_ID(); 
+			System.out.println("sql : " + sql);
+			int i [] = MHRAttribute.getAllIDs(MHRAttribute.Table_Name, sql, get_TrxName());
+			MHRAttribute mealAtr = null;
+			if(i.length == 0) { //No attribute create new Attribute
+				mealAtr = new MHRAttribute(getCtx(), 0, get_TrxName());
+				mealAtr.setC_BPartner_ID(getC_BPartner_ID());
+				mealAtr.setHR_Concept_ID(ot.getMealConcept_ID());
+				mealAtr.setHR_Employee_ID(emp.get_ID());
+				mealAtr.setValidFrom(new Timestamp(System.currentTimeMillis()));
+				mealAtr.setColumnType("A");
+				mealAtr.save();
+			}else {
+				mealAtr = new MHRAttribute(getCtx(), i[i.length -1], get_TrxName());
+			}
+			setMealAtrribute_ID(mealAtr.get_ID());
+		}
+		
 		
 		return true;
 	}

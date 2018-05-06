@@ -992,6 +992,8 @@ public class MHRProcess extends X_HR_Process implements DocAction
 					cap = createMovementFromConcept((MHRConcept)loan.getHR_LoanType().getHR_Concept(), true);
 					cap.setHR_Concept_ID(loan.getHR_LoanType().getHR_Concept_ID());
 					cap.setHR_Payroll_ID(this.getHR_Payroll_ID());
+					cap.setValidFrom(m_dateFrom);
+					cap.setValidTo(m_dateTo);
 					
 					//capital and interest for two movement
 					if(loan.getHR_LoanType().getInterestConcept_ID() == 0){ //no separate concept both interest and capital ad to one concept
@@ -1003,6 +1005,8 @@ public class MHRProcess extends X_HR_Process implements DocAction
 						inte.setHR_Concept_ID(loan.getHR_LoanType().getInterestConcept_ID());
 						inte.setHR_Payroll_ID(this.getHR_Payroll_ID());
 						inte.setAmount(schdl.getInterestAmt());
+						inte.setValidFrom(m_dateFrom);
+						inte.setValidTo(m_dateTo);
 						inte.save();
 						schdl.setInterestMovement_ID(inte.get_ID());
 					}
@@ -1052,6 +1056,8 @@ public class MHRProcess extends X_HR_Process implements DocAction
 			
 			while(rs.next()) {
 				
+				System.out.println("Hello Saman");
+				
 				line = new MHROTLine(getCtx(), rs.getInt("hr_otline_id"), get_TrxName());
 				atr = new MHRAttribute(getCtx(), line.getOTAtrribute_ID() , get_TrxName());
 				
@@ -1059,6 +1065,9 @@ public class MHRProcess extends X_HR_Process implements DocAction
 				otl.setHR_Concept_ID(atr.getHR_Concept_ID());
 				otl.setHR_Payroll_ID(this.getHR_Payroll_ID());
 				otl.setAmount(line.getTotalOTAmt());
+				otl.setValidFrom(m_dateFrom);
+				otl.setValidTo(m_dateTo);
+				otl.setC_BPartner_ID(line.getC_BPartner_ID());
 				otl.save();
 				
 				if(line.isMeal()) {
@@ -1068,6 +1077,9 @@ public class MHRProcess extends X_HR_Process implements DocAction
 					otl.setHR_Concept_ID(atr.getHR_Concept_ID());
 					otl.setHR_Payroll_ID(this.getHR_Payroll_ID());
 					otl.setAmount(line.getMealAllowance());
+					otl.setValidFrom(m_dateFrom);
+					otl.setValidTo(m_dateTo);
+					otl.setC_BPartner_ID(line.getC_BPartner_ID());
 					
 					otl.save();
 				}
@@ -1081,13 +1093,14 @@ public class MHRProcess extends X_HR_Process implements DocAction
 		}
 		
 		//No Pay
-		sql = " select distinct npl.hr_nopayline_id " + 
-		" from HR_Movement mov " + 
+		sql = " select distinct npl.hr_nopayline_id " +
+		" from HR_Movement mov " +
 		" inner join hr_nopayline npl on npl.c_bpartner_id = mov.c_bpartner_id " + 
-		" inner join hr_nopay np on mov.hr_process_id = np.hr_process_id " + 
-		" where mov.HR_Process_ID=?" + 
+		" inner join hr_nopay np on mov.hr_process_id = np.hr_process_id " +
+		" where mov.HR_Process_ID=?" +
 		" and np.docstatus = 'CO' " +
-		" and mov.ad_client_id = ? ";
+		" and mov.ad_client_id = ? " +
+		" and np.HR_NoPay_ID = npl.HR_NoPay_ID";
 		
 		try {
 			psmt = null; rs = null;
@@ -1111,17 +1124,15 @@ public class MHRProcess extends X_HR_Process implements DocAction
 					
 					concept = new MHRConcept(getCtx(), rs2.getInt("nopayconcept_id"), get_TrxName());
 					
-					System.out.println(concept);
-					
 					mov = createMovementFromConcept(concept, true);
 					mov.setHR_Concept_ID(concept.get_ID());
 					mov.setHR_Payroll_ID(this.getHR_Payroll_ID());
+					mov.setC_BPartner_ID(npl.getC_BPartner_ID());
 					mov.setAmount(rs2.getBigDecimal("total"));
-					
-					//mov.save();
+					mov.setValidFrom(m_dateFrom);
+					mov.setValidTo(m_dateTo);
+					mov.save();
 				}
-				
-				//rs2.close();
 			}
 			
 		}catch(Exception ex) {
@@ -1129,9 +1140,6 @@ public class MHRProcess extends X_HR_Process implements DocAction
 			psmt = null; rs = null;
 			throw new AdempiereException(ex.getMessage());
 		}
-			
-		
-		
 		// Save period & finish
 		if(getHR_Period_ID()>0)
 		{
@@ -1222,8 +1230,6 @@ public class MHRProcess extends X_HR_Process implements DocAction
 		m_movement.put(concept.getHR_Concept_ID(), movement);
 		return movement;
 	}
-
-
 
 	// Helper methods -------------------------------------------------------------------------------
 

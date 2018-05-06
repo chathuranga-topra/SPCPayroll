@@ -201,5 +201,4 @@ public class MHRNoPayLine extends X_HR_NoPayLine{
 		
 		return rs;
 	}
-	
 }
