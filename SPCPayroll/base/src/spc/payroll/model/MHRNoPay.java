@@ -5,9 +5,11 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.util.Properties;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.compiere.process.DocAction;
 import org.compiere.process.DocOptions;
 import org.compiere.process.DocumentEngine;
+import org.compiere.util.DB;
 
 public class MHRNoPay extends X_HR_NoPay implements DocAction , DocOptions {
 
@@ -22,8 +24,6 @@ public class MHRNoPay extends X_HR_NoPay implements DocAction , DocOptions {
 	}
 	
 	protected boolean beforeSave(boolean newRecord){
-		
-		System.out.println(this.Table_Name);
 		
 		return true;
 	}
@@ -46,11 +46,11 @@ public class MHRNoPay extends X_HR_NoPay implements DocAction , DocOptions {
 	@Override
 	public boolean processIt(String action) throws Exception {
 		
-		if(getDocAction().equals("CO") && getDocStatus().equals("DR"))
+		if(getDocAction().equals("CO") && getDocStatus().equals("DR") && action.equals("--"))
 			this.completeIt();
 		else if(getDocAction().equalsIgnoreCase("CL") && getDocStatus().equals("CO"))
 			this.closeIt();
-		else if(getDocAction().equalsIgnoreCase("VO"))
+		else if(getDocAction().equalsIgnoreCase("VO") && getDocStatus().equals("CO"))
 			this.voidIt();
 		
 		return true;
@@ -89,12 +89,21 @@ public class MHRNoPay extends X_HR_NoPay implements DocAction , DocOptions {
 	@Override
 	public String completeIt() {
 		
-		setDocStatus("CO");
-		setDocAction("VO");
+		//before complete validate lines
+		MHRNoPayLine [] lines = MHRNoPayLine.getLines(this);
+		if(lines.length == 0) {
+			throw new AdempiereException("Zero nopay lines found!");
+		}
 		
+		//update all payroll lines as processed
+		String sql = "UPDATE HR_NoPayLine SET PROCESSED = 'Y' WHERE HR_NoPay_ID = ?";
+		DB.executeUpdate(sql, get_ID(), get_TrxName());
+		
+		setDocStatus("CO");
 		setProcessed(true);
 		return null;
 	}
+	
 
 	@Override
 	public boolean voidIt() {

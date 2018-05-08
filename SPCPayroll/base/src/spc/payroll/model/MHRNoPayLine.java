@@ -6,12 +6,17 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.List;
 import java.util.Properties;
 
 import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MAttribute;
+import org.compiere.model.Query;
 import org.compiere.util.DB;
 import org.eevolution.model.MHRAttribute;
+import org.eevolution.model.MHRConcept;
+import org.eevolution.model.MHRMovement;
+import org.eevolution.model.MHRProcess;
 
 public class MHRNoPayLine extends X_HR_NoPayLine{
 
@@ -136,6 +141,14 @@ public class MHRNoPayLine extends X_HR_NoPayLine{
 		}
 	}
 	
+	public static MHRNoPayLine [] getLines(MHRNoPay noPay) {
+		
+		List<MHRNoPayLine> list = new Query(noPay.getCtx(), MHRNoPayLine.Table_Name, COLUMNNAME_HR_NoPay_ID+"=?", noPay.get_TrxName())
+		.setParameters(noPay.get_ID())
+		.list();
+		return list.toArray(new MHRNoPayLine[list.size()]);
+	}
+	
 	private void changeNoOfDates(BigDecimal NoOfDays) {
 		
 		
@@ -166,4 +179,27 @@ public class MHRNoPayLine extends X_HR_NoPayLine{
 			throw new AdempiereException("No payroll movement found!");
 		}
 	}
+	
+	public ResultSet getInforToCreateMovements() {
+		
+		String sql = "select sum(deduction) as total , nopayconcept_id " + 
+		"from HR_NoPayAttribute " + 
+		"where HR_NoPayLine_ID=? " + 
+		"and ad_client_id = ? " + 
+		"group by hr_attribute_id ,nopayconcept_id";
+		
+		PreparedStatement psmt = null; ResultSet rs = null;
+		try{
+			
+			psmt = DB.prepareStatement(sql, get_TrxName());
+			psmt.setInt(1, this.get_ID());
+			psmt.setInt(2, this.getAD_Client_ID());
+			
+			rs = psmt.executeQuery();
+			
+		}catch(Exception ex) { }
+		
+		return rs;
+	}
+	
 }

@@ -53,6 +53,7 @@ import org.compiere.util.TimeUtil;
 
 import spc.payroll.model.MHRLoan;
 import spc.payroll.model.MHRLoanSchedule;
+import spc.payroll.model.MHRNoPayLine;
 import spc.payroll.model.MHROTLine;
 
 /**
@@ -981,7 +982,8 @@ public class MHRProcess extends X_HR_Process implements DocAction
 			}
 			
 			MHRMovement cap;MHRMovement inte;
-			//validate for available loans
+			
+			//HR Loans
 			MHRLoan loans [] = MHRLoan.getLoans(p_ctx, bp.get_ID(), this.get_TrxName());
 			for(MHRLoan loan : loans){
 				MHRLoanSchedule schdl = MHRLoan.getDuePaymentSc(p_ctx, this.getDateAcct(), loan.get_ID(), this.get_TrxName());
@@ -1030,15 +1032,17 @@ public class MHRProcess extends X_HR_Process implements DocAction
 		"inner join hr_movement mov on mov.hr_process_id = p.hr_process_id " + 
 		"and l.c_bpartner_id = mov.c_bpartner_id " + 
 		"and p.hr_process_id = ? " + 
-		"and ot.docstatus = 'CO'";
+		"and ot.docstatus = 'CO' " + 
+		"and mov.ad_client_id = ? ";
 		
 		PreparedStatement psmt = null; ResultSet rs = null;
 		
-		//create Over time
+		//Over time
 		try {
 			
 			psmt = DB.prepareStatement(sql, get_TrxName());
 			psmt.setInt(1, this.get_ID());
+			psmt.setInt(2, this.getAD_Client_ID());
 			
 			rs = psmt.executeQuery();
 			
@@ -1064,8 +1068,60 @@ public class MHRProcess extends X_HR_Process implements DocAction
 					otl.setHR_Concept_ID(atr.getHR_Concept_ID());
 					otl.setHR_Payroll_ID(this.getHR_Payroll_ID());
 					otl.setAmount(line.getMealAllowance());
+					
 					otl.save();
 				}
+			}
+			
+			
+		}catch(Exception ex) {
+			DB.close(rs, psmt);
+			psmt = null; rs = null;
+			throw new AdempiereException(ex.getMessage());
+		}
+		
+		//No Pay
+		sql = " select distinct npl.hr_nopayline_id " + 
+		" from HR_Movement mov " + 
+		" inner join hr_nopayline npl on npl.c_bpartner_id = mov.c_bpartner_id " + 
+		" inner join hr_nopay np on mov.hr_process_id = np.hr_process_id " + 
+		" where mov.HR_Process_ID=?" + 
+		" and np.docstatus = 'CO' " +
+		" and mov.ad_client_id = ? ";
+		
+		try {
+			psmt = null; rs = null;
+			psmt = DB.prepareStatement(sql, get_TrxName());
+			psmt.setInt(1, this.get_ID());
+			psmt.setInt(2, this.getAD_Client_ID());
+			
+			rs = psmt.executeQuery();
+			
+			MHRNoPayLine npl = null;
+			ResultSet rs2 = null;
+			MHRMovement mov = null;
+			MHRConcept concept = null;
+			
+			while(rs.next()) {
+				
+				npl = new MHRNoPayLine(getCtx(), rs.getInt("hr_nopayline_id"), get_TrxName());
+				rs2 = npl.getInforToCreateMovements();
+				
+				while(rs2.next()) {
+					
+					concept = new MHRConcept(getCtx(), rs2.getInt("nopayconcept_id"), get_TrxName());
+					
+					System.out.println(concept);
+					
+					mov = createMovementFromConcept(concept, true);
+					mov.setHR_Concept_ID(concept.get_ID());
+					mov.setHR_Payroll_ID(this.getHR_Payroll_ID());
+					mov.setAmount(rs2.getBigDecimal("total"));
+					
+					//mov.save();
+				}
+				
+				//rs2.close();
 			}
 			
 		}catch(Exception ex) {
@@ -1073,6 +1129,8 @@ public class MHRProcess extends X_HR_Process implements DocAction
 			psmt = null; rs = null;
 			throw new AdempiereException(ex.getMessage());
 		}
+			
+		
 		
 		// Save period & finish
 		if(getHR_Period_ID()>0)
