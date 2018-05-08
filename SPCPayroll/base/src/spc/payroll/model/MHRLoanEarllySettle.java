@@ -42,10 +42,10 @@ public class MHRLoanEarllySettle extends X_HR_LoanEarllySettle implements DocAct
 		
 		//set loan balance
 		MHRLoan loan = new MHRLoan(getCtx() , this.getHR_Loan_ID() , get_TrxName());
-		BigDecimal balance = new BigDecimal(0);
+		BigDecimal balance = MHRLoan.getBalance(loan);
 		BigDecimal ir = loan.getHR_LoanType().getRate();
-		int paybleInstallmentCount = 0;
-		double interest = 0.00;
+		int paybleInstallmentCount = MHRLoan.getPayableInstallmentCount(loan);
+		BigDecimal interest = new BigDecimal(0);
 		//BigDecimal newInterest = new BigDecimal(0);
 		
 		
@@ -77,11 +77,14 @@ public class MHRLoanEarllySettle extends X_HR_LoanEarllySettle implements DocAct
 			
 		}else if(this.getType().equals("FS")){//full payment
 			
-			interest = ((((getBalance().doubleValue() * ir.doubleValue() / 100) * 1/12) * 
-			(getPayableInstallmentCount() + 1) / getPayableInstallmentCount()) * 1/2);
-			setNewInterestTotal(new BigDecimal(interest).setScale(2, RoundingMode.HALF_UP).multiply(new BigDecimal(getPayableInstallmentCount())).setScale(2, RoundingMode.HALF_UP));
-			paybleInstallmentCount = MHRLoan.getPayableInstallmentCount(loan);
-			balance = MHRLoan.getBalance(loan);
+			interest = balance.multiply(ir).divide(new BigDecimal(100) , 2 , RoundingMode.HALF_UP);
+			interest = interest.divide(new BigDecimal(12) , 2 , RoundingMode.HALF_UP);
+			interest = interest.multiply(new BigDecimal(paybleInstallmentCount + 1));
+			interest = interest.divide(new BigDecimal(paybleInstallmentCount) , 2 , RoundingMode.HALF_UP);
+			interest = interest.multiply(new BigDecimal(0.5));
+			
+			setNewInterestTotal(interest.multiply(new BigDecimal(paybleInstallmentCount)).setScale(2, RoundingMode.HALF_UP));
+			
 		}
 		
 		
@@ -229,12 +232,14 @@ public class MHRLoanEarllySettle extends X_HR_LoanEarllySettle implements DocAct
 		
 		if(getDocStatus().equals("CO")){
 			//remove updated data from loan schedule
-			sql = "UPDATE HR_LoanSchedule SET PROCESSED = 'N'  , ISPAID = 'N' , HR_LoanEarllySettle_ID = null WHERE HR_LoanEarllySettle_ID = ?";
-			DB.executeUpdate(sql, get_ID(), get_TrxName());
+			MHRLoanEarllySettlelLine [] lines = getLines(this);
+			
+			for(MHRLoanEarllySettlelLine line : lines) {
+				line.getHR_LoanSchedule_ID();
+			}
 			
 			//UNCLOSED LOAN
 			MHRLoan loan = (MHRLoan) this.getHR_Loan();
-			System.out.println(loan.getBalance());
 			loan.setDocAction("CL");
 			loan.setDocStatus("CO");
 			loan.save();

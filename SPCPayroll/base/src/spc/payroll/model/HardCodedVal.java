@@ -11,5 +11,4 @@ public class HardCodedVal {
 	public static int hr_LoanType_idBasicsalary = 1000001; // Salary Advance
 	public static int hr_LoanType_idFestivalAdvance = 1000010; // Festival Advance
 	
-	//
 }

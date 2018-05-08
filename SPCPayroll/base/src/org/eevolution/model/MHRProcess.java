@@ -1010,12 +1010,15 @@ public class MHRProcess extends X_HR_Process implements DocAction
 						inte.save();
 						schdl.setInterestMovement_ID(inte.get_ID());
 					}
-					
 					cap.save();
-					schdl.setIsPaid(true);
-					schdl.setHR_Movement_ID(cap.get_ID());
-					schdl.setProcessed(true);
-					schdl.save();
+					
+					if(getDocAction().equals("CO")) {//when only completing the schedule will be updated
+						schdl.setIsPaid(true);
+						schdl.setHR_Movement_ID(cap.get_ID());
+						schdl.setProcessed(true);
+						schdl.save();
+					}
+					
 				}
 				//close the loan when it paid all installments
 				if(MHRLoan.getBalance(loan).compareTo(loan.getBalance()) == 0){
