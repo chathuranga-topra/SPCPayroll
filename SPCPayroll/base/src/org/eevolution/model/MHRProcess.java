@@ -1059,10 +1059,10 @@ public class MHRProcess extends X_HR_Process implements DocAction
 			
 			while(rs.next()) {
 				
-				System.out.println("Hello Saman");
-				
 				line = new MHROTLine(getCtx(), rs.getInt("hr_otline_id"), get_TrxName());
 				atr = new MHRAttribute(getCtx(), line.getOTAtrribute_ID() , get_TrxName());
+				
+				System.out.println(line);
 				
 				otl = createMovementFromConcept((MHRConcept)atr.getHR_Concept(), true);
 				otl.setHR_Concept_ID(atr.getHR_Concept_ID());
@@ -1072,6 +1072,8 @@ public class MHRProcess extends X_HR_Process implements DocAction
 				otl.setValidTo(m_dateTo);
 				otl.setC_BPartner_ID(line.getC_BPartner_ID());
 				otl.save();
+				
+				System.out.println(otl);
 				
 				if(line.isMeal()) {
 					atr = new MHRAttribute(getCtx(), line.getMealAtrribute_ID() , get_TrxName());
@@ -1085,6 +1087,8 @@ public class MHRProcess extends X_HR_Process implements DocAction
 					otl.setC_BPartner_ID(line.getC_BPartner_ID());
 					
 					otl.save();
+					
+					System.out.println(otl);
 				}
 			}
 			
