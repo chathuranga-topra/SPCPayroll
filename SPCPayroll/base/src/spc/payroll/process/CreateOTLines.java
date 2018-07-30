@@ -93,10 +93,9 @@ public class CreateOTLines extends SvrProcess{
 			}
 			
 		}catch(Exception ex) {
-			ex.printStackTrace();
-		}
-			
-		return "Line created - " + i;
+			ex.printStackTrace();		
 	}
 
+return "Line created - " + i;
+	}
 }
