@@ -33,7 +33,7 @@ public class X_HR_LoanEarllySettle extends PO implements I_HR_LoanEarllySettle, 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20180418L;
+	private static final long serialVersionUID = 20180731L;
 
     /** Standard Constructor */
     public X_HR_LoanEarllySettle (Properties ctx, int HR_LoanEarllySettle_ID, String trxName)
@@ -45,6 +45,7 @@ public class X_HR_LoanEarllySettle extends PO implements I_HR_LoanEarllySettle, 
 			setHR_LoanEarllySettle_ID (0);
 			setHR_Loan_ID (0);
 			setSettleDate (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
 			setType (null);
         } */
     }
@@ -293,6 +294,23 @@ public class X_HR_LoanEarllySettle extends PO implements I_HR_LoanEarllySettle, 
 		return ii.intValue();
 	}
 
+	/** Set LateDaysInterest.
+		@param LateDaysInterest LateDaysInterest	  */
+	public void setLateDaysInterest (BigDecimal LateDaysInterest)
+	{
+		set_Value (COLUMNNAME_LateDaysInterest, LateDaysInterest);
+	}
+
+	/** Get LateDaysInterest.
+		@return LateDaysInterest	  */
+	public BigDecimal getLateDaysInterest () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_LateDaysInterest);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
 	/** Set New Interest Total.
 		@param NewInterestTotal New Interest Total	  */
 	public void setNewInterestTotal (BigDecimal NewInterestTotal)
@@ -327,15 +345,15 @@ public class X_HR_LoanEarllySettle extends PO implements I_HR_LoanEarllySettle, 
 		return bd;
 	}
 
-	/** Set Paid Installment Count.
-		@param PaidInstallmentCount Paid Installment Count	  */
+	/** Set Paid Installment.
+		@param PaidInstallmentCount Paid Installment	  */
 	public void setPaidInstallmentCount (int PaidInstallmentCount)
 	{
 		set_Value (COLUMNNAME_PaidInstallmentCount, Integer.valueOf(PaidInstallmentCount));
 	}
 
-	/** Get Paid Installment Count.
-		@return Paid Installment Count	  */
+	/** Get Paid Installment.
+		@return Paid Installment	  */
 	public int getPaidInstallmentCount () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_PaidInstallmentCount);
@@ -344,15 +362,15 @@ public class X_HR_LoanEarllySettle extends PO implements I_HR_LoanEarllySettle, 
 		return ii.intValue();
 	}
 
-	/** Set Payable Installment Count.
-		@param PayableInstallmentCount Payable Installment Count	  */
+	/** Set Payable Installment.
+		@param PayableInstallmentCount Payable Installment	  */
 	public void setPayableInstallmentCount (int PayableInstallmentCount)
 	{
 		set_Value (COLUMNNAME_PayableInstallmentCount, Integer.valueOf(PayableInstallmentCount));
 	}
 
-	/** Get Payable Installment Count.
-		@return Payable Installment Count	  */
+	/** Get Payable Installment.
+		@return Payable Installment	  */
 	public int getPayableInstallmentCount () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_PayableInstallmentCount);

@@ -44,9 +44,6 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 	}
 	
 	protected boolean beforeSave(boolean newRecord){
-		
-		//MHREmployee
-		
 		//validate duplicate loans opening
 		this.validateDuplicate();
 		
@@ -195,17 +192,17 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 		sc.save();
 		
 		//calculate 40 Present payment feasible range based on the last payroll
-		//this.createFourtyPresentLines(trx);
+		this.createFourtyPresentLines(trx);
 		
 		//this.set loan installemet value
 		this.setLoanInstallment(sc.getCapitalAmt().add(sc.getInterestAmt().subtract(diff)));
 		
 		//40 present validation
-		//setIsValid(getLoanInstallment().doubleValue() <= (getFourtyPresent().doubleValue() - getTotalDeduction().doubleValue()));
+		setIsValid(getLoanInstallment().doubleValue() <= (getFourtyPresent().doubleValue() - getTotalDeduction().doubleValue()));
 	
-		/*if(!isValid())
-			//there can be loans which is not validated the 40 %
-			setIsValid(getFourtyPresent().doubleValue() == 0.00);*/
+		if(!isValid())
+			//there can be loans which is not validated the 40 
+			setIsValid(getFourtyPresent().doubleValue() == 0.00);
 		
 		if(!isValid()) {
 			sql = "update HR_Loan set isvalid = 'N' where hr_loan_id = ?";
@@ -440,6 +437,14 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 	public static MHRLoanSchedule[] getLoanSchedule(Properties ctx, int HR_Loan_ID , String trxName){
 		
 		List<MHRLoanSchedule> list = new Query(ctx, MHRLoanSchedule.Table_Name, COLUMNNAME_HR_Loan_ID+"=? AND ISACTIVE = 'Y' ", trxName)
+		.setParameters(HR_Loan_ID)
+		.list();
+		return list.toArray(new MHRLoanSchedule[list.size()]);
+	}
+	
+	public static MHRLoanSchedule[] getLoanSchedule(Properties ctx,int HR_Loan_ID, String where , String trxName){
+		
+		List<MHRLoanSchedule> list = new Query(ctx, MHRLoanSchedule.Table_Name, COLUMNNAME_HR_Loan_ID+"=? AND ISACTIVE = 'Y' AND " + where, trxName)
 		.setParameters(HR_Loan_ID)
 		.list();
 		return list.toArray(new MHRLoanSchedule[list.size()]);

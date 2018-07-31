@@ -188,6 +188,15 @@ public interface I_HR_LoanEarllySettle
 	  */
 	public boolean isActive();
 
+    /** Column name LateDaysInterest */
+    public static final String COLUMNNAME_LateDaysInterest = "LateDaysInterest";
+
+	/** Set LateDaysInterest	  */
+	public void setLateDaysInterest (BigDecimal LateDaysInterest);
+
+	/** Get LateDaysInterest	  */
+	public BigDecimal getLateDaysInterest();
+
     /** Column name NewInterestTotal */
     public static final String COLUMNNAME_NewInterestTotal = "NewInterestTotal";
 
@@ -209,19 +218,19 @@ public interface I_HR_LoanEarllySettle
     /** Column name PaidInstallmentCount */
     public static final String COLUMNNAME_PaidInstallmentCount = "PaidInstallmentCount";
 
-	/** Set Paid Installment Count	  */
+	/** Set Paid Installment	  */
 	public void setPaidInstallmentCount (int PaidInstallmentCount);
 
-	/** Get Paid Installment Count	  */
+	/** Get Paid Installment	  */
 	public int getPaidInstallmentCount();
 
     /** Column name PayableInstallmentCount */
     public static final String COLUMNNAME_PayableInstallmentCount = "PayableInstallmentCount";
 
-	/** Set Payable Installment Count	  */
+	/** Set Payable Installment	  */
 	public void setPayableInstallmentCount (int PayableInstallmentCount);
 
-	/** Get Payable Installment Count	  */
+	/** Get Payable Installment	  */
 	public int getPayableInstallmentCount();
 
     /** Column name PaymentDocumentNo */

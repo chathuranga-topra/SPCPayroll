@@ -4,8 +4,12 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.ResultSet;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.Query;
@@ -78,13 +82,8 @@ public class MHRLoanEarllySettle extends X_HR_LoanEarllySettle implements DocAct
 		);
 		
 		//set old interest
-		sql = "SELECT SUM(InterestAmt) FROM HR_LoanSchedule WHERE seqno BETWEEN ? "
-				+ "AND ? AND Ispaid = 'N' AND HR_Loan_ID=? ";
-		OldInterestTotal = DB.getSQLValueBD(get_TrxName(), sql, 
-			lastPaymentSeqNo , 
-			paybleInstallmentCount,
-			getHR_Loan_ID()
-		);
+		sql = "SELECT SUM(InterestAmt) FROM HR_LoanSchedule WHERE IsPaid = 'N' AND HR_Loan_ID=? ";
+		OldInterestTotal = DB.getSQLValueBD(get_TrxName(), sql,getHR_Loan_ID());
 		
 		//calculate new interest total
 		sql = "SELECT SUM(InterestAmt) FROM HR_LoanSchedule WHERE  Ispaid = 'N' AND HR_Loan_ID=? ";
@@ -102,11 +101,32 @@ public class MHRLoanEarllySettle extends X_HR_LoanEarllySettle implements DocAct
 		newInterestBeforeAdgustment = newInterestBeforeAdgustment.setScale(2, RoundingMode.HALF_UP);
 		BigDecimal newInterestBeforeNoOfDaysInterest = oldTotalRestInterest.subtract(newInterestBeforeAdgustment);
 		
-		//calcutae late days for interest
+		//calculate late days for interest
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(getSettleDate());
+		cal.set(5, 25);//default date is 25th of every month
 		
+		Date defaultDate = cal.getTime();
+		int dayDiff = (int) TimeUnit.DAYS.convert(getSettleDate().getTime() - defaultDate.getTime(), TimeUnit.MILLISECONDS);
+		
+		if(dayDiff<0) {//minus date differences
+			
+			cal.setTime(defaultDate);
+			cal.add(Calendar.MONTH, -1);
+			defaultDate = cal.getTime();
+			dayDiff = (int) TimeUnit.DAYS.convert(getSettleDate().getTime() - defaultDate.getTime(), TimeUnit.MILLISECONDS);
+		}
+		//interest for dates
+		BigDecimal lateDaysInterest = MHRLoan.getBalance(loan)
+			.multiply(new BigDecimal(dayDiff))
+			.divide(new BigDecimal(365) , 2 , RoundingMode.HALF_UP)
+			.multiply(new BigDecimal(7))
+			.divide(new BigDecimal(100) , 2 , RoundingMode.HALF_UP);
 		
 		setBalance(balance);
 		setOldInterestTotal(OldInterestTotal);
+		setNewInterestTotal(newInterestBeforeNoOfDaysInterest.add(lateDaysInterest));
+		setLateDaysInterest(lateDaysInterest);
 		
 		return true;
 	}
@@ -116,10 +136,10 @@ public class MHRLoanEarllySettle extends X_HR_LoanEarllySettle implements DocAct
 			String orderType, String isSOTrx, int AD_Table_ID,
 			String[] docAction, String[] options, int index) {
 		
-		if (docStatus.equals(DocumentEngine.STATUS_Drafted)
+		/*if (docStatus.equals(DocumentEngine.STATUS_Drafted)
     			|| docStatus.equals(DocumentEngine.STATUS_Invalid)) {
-    		options[index++] = DocumentEngine.ACTION_Prepare;
-    	}
+    		options[index++] = DocumentEngine.ACTION_Complete;
+    	}*/
     	// If status = Completed, add "Reactivate" in the list
     	if (docStatus.equals(DocumentEngine.STATUS_Completed)) {
     		//options[index++] = DocumentEngine.ACTION_ReActivate;
@@ -160,17 +180,19 @@ public class MHRLoanEarllySettle extends X_HR_LoanEarllySettle implements DocAct
 		//delete existing records
 		String sql = "DELETE FROM HR_LoanEarllySettlelLine WHERE HR_LoanEarllySettle_ID = ? ";
 		DB.executeUpdate(sql, this.get_ID(), this.get_TrxName());
-		MHRLoanSchedule[] lns = null;
+		MHRLoanSchedule[] lns = MHRLoan.getLoanSchedule(getCtx(), 
+			getHR_Loan_ID(),
+			" SEQNO BETWEEN '" +getPaidInstallmentCount() + "' "
+			+ " AND '"+ getPayableInstallmentCount() + "'"
+			+ " AND ISPAID = 'N'",
+			get_TrxName());
 		
-		if(getType().equals("FS")){//full settlement
-			lns = MHRLoan.getLoanUpPaidSchedule(getCtx(), this.getHR_Loan_ID(), get_TrxName());
-		}else if(getType().equals("TT")){//2 of 3 third settlement
-		
-			
-		}
-		
-		MHRLoanEarllySettlelLine sLine;
+		MHRLoanEarllySettlelLine sLine = null;
 		for(MHRLoanSchedule sc : lns){
+			
+			if(sLine == null) {//get identified the first installment then add the days interest calculation
+				
+			}
 			
 			sLine = new MHRLoanEarllySettlelLine(getCtx(), 0, get_TrxName());
 			sLine.setHR_LoanEarllySettle_ID(this.get_ID());
