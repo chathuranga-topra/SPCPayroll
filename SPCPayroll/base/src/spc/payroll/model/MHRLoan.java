@@ -195,17 +195,17 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 		sc.save();
 		
 		//calculate 40 Present payment feasible range based on the last payroll
-		this.createFourtyPresentLines(trx);
+		//this.createFourtyPresentLines(trx);
 		
 		//this.set loan installemet value
 		this.setLoanInstallment(sc.getCapitalAmt().add(sc.getInterestAmt().subtract(diff)));
 		
 		//40 present validation
-		setIsValid(getLoanInstallment().doubleValue() <= (getFourtyPresent().doubleValue() - getTotalDeduction().doubleValue()));
+		//setIsValid(getLoanInstallment().doubleValue() <= (getFourtyPresent().doubleValue() - getTotalDeduction().doubleValue()));
 	
-		if(!isValid())
+		/*if(!isValid())
 			//there can be loans which is not validated the 40 %
-			setIsValid(getFourtyPresent().doubleValue() == 0.00);
+			setIsValid(getFourtyPresent().doubleValue() == 0.00);*/
 		
 		if(!isValid()) {
 			sql = "update HR_Loan set isvalid = 'N' where hr_loan_id = ?";
@@ -299,11 +299,20 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 	@Override
 	public boolean voidIt() {
 		
-		//inactive the atribute for partucular loan
+		//inactive the attribute for particular loan
 		MHRAttribute atribute = new MHRAttribute(this.getCtx() , this.getHR_Attribute_ID() , this.get_TrxName());
 		
-		if(atribute.get_ID() != 0){//no atributte
+		if(atribute.get_ID() != 0){//no attribute
 			
+			atribute.setIsActive(false);
+			atribute.setDescription("**VOIDED**");
+			atribute.set_CustomColumn("processed", "Y");
+			atribute.save();
+		}
+		
+		//Interest attribute
+		if(!(getInterestAttribute() == null || getInterestAttribute().getHR_Attribute_ID() == -1)) {
+			atribute = (MHRAttribute) getInterestAttribute();
 			atribute.setIsActive(false);
 			atribute.setDescription("**VOIDED**");
 			atribute.set_CustomColumn("processed", "Y");
@@ -545,7 +554,7 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 		if(latsHrProcessId == -1)
 			throw new AdempiereException("No previous payroll movements found - 40 present validation failed");
 		
-		//this has done only based on the payrolll movement
+		//this has done only based on the payroll movement
 		sql = "select p.hr_process_id,bp.name,m.hr_concept_id, " + 
 			" (case when m.hr_concept_category_id = ? " + 
 			" then m.amount * -1 when m.hr_concept_category_id = ? then m.amount end) * f.percentage /100  as amount " + 
@@ -605,7 +614,7 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
  				seqNo+=10;
  			}
 		
-			//based on loan gurantee :: validate loan applicant signed for any loan and 40 present include 
+			//based on loan guarantee :: validate loan applicant signed for any loan and 40 present include 
 			//50% of loan installment
 			
 			sql = "select lt.name as loantype , bp.name as signedto, l.loaninstallment *-.5 as amount , l.documentno  from HR_LoanGurantee g " + 

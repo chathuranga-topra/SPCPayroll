@@ -31,8 +31,9 @@ public class MHRLoanEarllySettle extends X_HR_LoanEarllySettle implements DocAct
 	protected boolean beforeSave(boolean newRecord){
 		
 		//validate duplicate loans opening
-		String whereClause = "DOCSTATUS NOT IN('VO' , 'CO') AND HR_LOAN_ID = "+getHR_Loan_ID()+" AND HR_LoanEarllySettle_ID NOT IN ("+get_ID()+")";
-		int length = MHRLoanEarllySettle.getAllIDs("HR_LoanEarllySettle", whereClause , get_TrxName()).length;
+		String sql = "DOCSTATUS NOT IN('VO' , 'CO') AND HR_LOAN_ID = "+getHR_Loan_ID()+" AND HR_LoanEarllySettle_ID NOT IN ("+get_ID()+")";
+
+		int length = MHRLoanEarllySettle.getAllIDs("HR_LoanEarllySettle", sql , get_TrxName()).length;
 		
 		if(length >= 1)
 			throw new AdempiereException("DUPLICATE DOCUMENT OPENED! Your are not allowed to open duplicate");
@@ -40,56 +41,72 @@ public class MHRLoanEarllySettle extends X_HR_LoanEarllySettle implements DocAct
 		if(!getDocStatus().equals("DR"))
 			return true;
 		
-		//set loan balance
-		MHRLoan loan = new MHRLoan(getCtx() , this.getHR_Loan_ID() , get_TrxName());
-		BigDecimal balance = MHRLoan.getBalance(loan);
+		MHRLoan loan = (MHRLoan) getHR_Loan();
+		
 		BigDecimal ir = loan.getHR_LoanType().getRate();
-		int paybleInstallmentCount = MHRLoan.getPayableInstallmentCount(loan);
-		BigDecimal interest = new BigDecimal(0);
-		//BigDecimal newInterest = new BigDecimal(0);
+		BigDecimal balance , OldInterestTotal = null;
 		
+		int paybleInstallmentCount = 0; // next payment installment sequence no
 		
-		//get total interest for no paid schedule
-		String sql = "SELECT SUM(interestamt) FROM HR_LoanSchedule WHERE HR_Loan_ID = ? and ispaid = 'N' AND IsActive = 'Y'";
+		int lastPaymentSeqNo = DB.getSQLValue(get_TrxName(), ""
+			+ " SELECT MAX(SEQNO) FROM HR_LoanSchedule WHERE ISPAID = 'Y' "
+			+ " AND HR_Loan_ID = " + loan.get_ID());
 		
-		BigDecimal oldInterest = DB.getSQLValueBD(this.get_TrxName(), sql, this.getHR_Loan_ID());
-		this.setOldInterestTotal(oldInterest);
-		
-		//set paid count
-		setPaidInstallmentCount(MHRLoan.getPaidInstallmentCount(loan));
-		
-		
-		
-		//calculate new interest based on the settlment type
-		if(this.getType().equals("TT")){//2 of 3 payment
+		if(this.getType().equals("TT")) {//Two of tree settlement
 			
-			//get 2 of third 3 rest payment schedule
-			sql = "SELECT MIN(SEQNO) FROM HR_LoanSchedule WHERE HR_Loan_ID = ? AND ISPAID = 'N'";
-			int from = DB.getSQLValue(get_TrxName(), sql, getHR_Loan_ID());
-			sql = "SELECT COUNT(*) * 2 /3  FROM HR_LoanSchedule WHERE HR_Loan_ID = ?";
-			int to = DB.getSQLValue(get_TrxName(), sql, getHR_Loan_ID());
+			//Next installment sequence no
+			paybleInstallmentCount = DB.getSQLValue(get_TrxName(), ""
+				+ " SELECT COUNT(*) * 2 /3 FROM HR_LoanSchedule WHERE "
+				+ " HR_Loan_ID = " + loan.get_ID());
 			
-			if(from > to){//already paid 2 of 3
-				throw new AdempiereException("ERROR! Already paid 2 of 3 from this loan");
-			}
-			
-			paybleInstallmentCount = to - from + 1;
-			
-		}else if(this.getType().equals("FS")){//full payment
-			
-			interest = balance.multiply(ir).divide(new BigDecimal(100) , 2 , RoundingMode.HALF_UP);
-			interest = interest.divide(new BigDecimal(12) , 2 , RoundingMode.HALF_UP);
-			interest = interest.multiply(new BigDecimal(paybleInstallmentCount + 1));
-			interest = interest.divide(new BigDecimal(paybleInstallmentCount) , 2 , RoundingMode.HALF_UP);
-			interest = interest.multiply(new BigDecimal(0.5));
-			
-			setNewInterestTotal(interest.multiply(new BigDecimal(paybleInstallmentCount)).setScale(2, RoundingMode.HALF_UP));
-			
+		}else if(this.getType().equals("FS")) {//full settlement
+			//Next installment sequence no
+			paybleInstallmentCount = DB.getSQLValue(get_TrxName(), ""
+				+ " SELECT MAX(SEQNO) FROM HR_LoanSchedule WHERE "
+				+ " HR_Loan_ID = " + loan.get_ID());
 		}
-		
-		
-		this.setBalance(balance);
+		setPaidInstallmentCount(lastPaymentSeqNo);
 		setPayableInstallmentCount(paybleInstallmentCount);
+		
+		//set balance 
+		sql = "SELECT SUM(CapitalAmt) FROM HR_LoanSchedule WHERE seqno BETWEEN ? "
+				+ "AND ? AND Ispaid = 'N' AND HR_Loan_ID=? ";
+		balance = DB.getSQLValueBD(get_TrxName(), sql, 
+			lastPaymentSeqNo , 
+			paybleInstallmentCount,
+			getHR_Loan_ID()
+		);
+		
+		//set old interest
+		sql = "SELECT SUM(InterestAmt) FROM HR_LoanSchedule WHERE seqno BETWEEN ? "
+				+ "AND ? AND Ispaid = 'N' AND HR_Loan_ID=? ";
+		OldInterestTotal = DB.getSQLValueBD(get_TrxName(), sql, 
+			lastPaymentSeqNo , 
+			paybleInstallmentCount,
+			getHR_Loan_ID()
+		);
+		
+		//calculate new interest total
+		sql = "SELECT SUM(InterestAmt) FROM HR_LoanSchedule WHERE  Ispaid = 'N' AND HR_Loan_ID=? ";
+		BigDecimal oldTotalRestInterest =  DB.getSQLValueBD(get_TrxName(), sql, getHR_Loan_ID());
+		
+		//new interest under new formuller
+		int toBePaidTotalInstallment = loan.getInstallmentCount() - MHRLoan.getPaidInstallmentCount(loan);
+		BigDecimal newInterestBeforeAdgustment = MHRLoan.getBalance(loan)
+				.multiply(new BigDecimal(toBePaidTotalInstallment + 1)
+				.multiply(ir))
+				.divide(new BigDecimal(100) , 2 , RoundingMode.HALF_UP)
+				.divide(new BigDecimal(12) , 2 , RoundingMode.HALF_UP)
+				.divide(new BigDecimal(2) , 2 , RoundingMode.HALF_UP);
+		
+		newInterestBeforeAdgustment = newInterestBeforeAdgustment.setScale(2, RoundingMode.HALF_UP);
+		BigDecimal newInterestBeforeNoOfDaysInterest = oldTotalRestInterest.subtract(newInterestBeforeAdgustment);
+		
+		//calcutae late days for interest
+		
+		
+		setBalance(balance);
+		setOldInterestTotal(OldInterestTotal);
 		
 		return true;
 	}
@@ -149,15 +166,7 @@ public class MHRLoanEarllySettle extends X_HR_LoanEarllySettle implements DocAct
 			lns = MHRLoan.getLoanUpPaidSchedule(getCtx(), this.getHR_Loan_ID(), get_TrxName());
 		}else if(getType().equals("TT")){//2 of 3 third settlement
 		
-			//get 2 of third 3 rest payment schedule
-			sql = "SELECT MIN(SEQNO) FROM HR_LoanSchedule WHERE HR_Loan_ID = ? AND ISPAID = 'N'";
-			int from = DB.getSQLValue(get_TrxName(), sql, getHR_Loan_ID());
-			sql = "SELECT COUNT(*) * 2 /3  FROM HR_LoanSchedule WHERE HR_Loan_ID = ?";
-			int to = DB.getSQLValue(get_TrxName(), sql, getHR_Loan_ID());
 			
-			if(from >=to){//already paid 2 of 3
-				throw new AdempiereException("ERROR! Already paid 2 of 3 from this loan");
-			}
 		}
 		
 		MHRLoanEarllySettlelLine sLine;
