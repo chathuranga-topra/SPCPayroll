@@ -210,6 +210,17 @@ public interface I_HR_Loan
 
 	public org.eevolution.model.I_HR_Attribute getHR_Attribute() throws RuntimeException;
 
+    /** Column name HR_LoanEarllySettle_ID */
+    public static final String COLUMNNAME_HR_LoanEarllySettle_ID = "HR_LoanEarllySettle_ID";
+
+	/** Set Earlly Settlement	  */
+	public void setHR_LoanEarllySettle_ID (int HR_LoanEarllySettle_ID);
+
+	/** Get Earlly Settlement	  */
+	public int getHR_LoanEarllySettle_ID();
+
+	public spc.payroll.model.I_HR_LoanEarllySettle getHR_LoanEarllySettle() throws RuntimeException;
+
     /** Column name HR_LoanType_ID */
     public static final String COLUMNNAME_HR_LoanType_ID = "HR_LoanType_ID";
 
@@ -262,6 +273,15 @@ public interface I_HR_Loan
 	  * The record is active in the system
 	  */
 	public boolean isActive();
+
+    /** Column name IsRenewalLoan */
+    public static final String COLUMNNAME_IsRenewalLoan = "IsRenewalLoan";
+
+	/** Set IsRenewalLoan	  */
+	public void setIsRenewalLoan (boolean IsRenewalLoan);
+
+	/** Get IsRenewalLoan	  */
+	public boolean isRenewalLoan();
 
     /** Column name IsValid */
     public static final String COLUMNNAME_IsValid = "IsValid";

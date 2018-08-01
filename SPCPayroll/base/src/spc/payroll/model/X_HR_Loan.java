@@ -33,7 +33,7 @@ public class X_HR_Loan extends PO implements I_HR_Loan, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20180422L;
+	private static final long serialVersionUID = 20180801L;
 
     /** Standard Constructor */
     public X_HR_Loan (Properties ctx, int HR_Loan_ID, String trxName)
@@ -42,6 +42,7 @@ public class X_HR_Loan extends PO implements I_HR_Loan, I_Persistent
       /** if (HR_Loan_ID == 0)
         {
 			setC_BPartner_ID (0);
+			setHR_LoanEarllySettle_ID (0);
 			setHR_LoanType_ID (0);
 			setHR_Loan_ID (0);
 			setInstallmentCount (0);
@@ -339,6 +340,31 @@ public class X_HR_Loan extends PO implements I_HR_Loan, I_Persistent
 		return ii.intValue();
 	}
 
+	public spc.payroll.model.I_HR_LoanEarllySettle getHR_LoanEarllySettle() throws RuntimeException
+    {
+		return (spc.payroll.model.I_HR_LoanEarllySettle)MTable.get(getCtx(), spc.payroll.model.I_HR_LoanEarllySettle.Table_Name)
+			.getPO(getHR_LoanEarllySettle_ID(), get_TrxName());	}
+
+	/** Set Earlly Settlement.
+		@param HR_LoanEarllySettle_ID Earlly Settlement	  */
+	public void setHR_LoanEarllySettle_ID (int HR_LoanEarllySettle_ID)
+	{
+		if (HR_LoanEarllySettle_ID < 1) 
+			set_Value (COLUMNNAME_HR_LoanEarllySettle_ID, null);
+		else 
+			set_Value (COLUMNNAME_HR_LoanEarllySettle_ID, Integer.valueOf(HR_LoanEarllySettle_ID));
+	}
+
+	/** Get Earlly Settlement.
+		@return Earlly Settlement	  */
+	public int getHR_LoanEarllySettle_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_HR_LoanEarllySettle_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	public spc.payroll.model.I_HR_LoanType getHR_LoanType() throws RuntimeException
     {
 		return (spc.payroll.model.I_HR_LoanType)MTable.get(getCtx(), spc.payroll.model.I_HR_LoanType.Table_Name)
@@ -424,6 +450,27 @@ public class X_HR_Loan extends PO implements I_HR_Loan, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set IsRenewalLoan.
+		@param IsRenewalLoan IsRenewalLoan	  */
+	public void setIsRenewalLoan (boolean IsRenewalLoan)
+	{
+		set_Value (COLUMNNAME_IsRenewalLoan, Boolean.valueOf(IsRenewalLoan));
+	}
+
+	/** Get IsRenewalLoan.
+		@return IsRenewalLoan	  */
+	public boolean isRenewalLoan () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsRenewalLoan);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
 	}
 
 	/** Set Valid.

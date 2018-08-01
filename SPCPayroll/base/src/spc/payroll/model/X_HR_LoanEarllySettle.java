@@ -33,7 +33,7 @@ public class X_HR_LoanEarllySettle extends PO implements I_HR_LoanEarllySettle, 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20180731L;
+	private static final long serialVersionUID = 20180801L;
 
     /** Standard Constructor */
     public X_HR_LoanEarllySettle (Properties ctx, int HR_LoanEarllySettle_ID, String trxName)
@@ -95,6 +95,23 @@ public class X_HR_LoanEarllySettle extends PO implements I_HR_LoanEarllySettle, 
 		return bd;
 	}
 
+	/** Set BalanceToPaid.
+		@param BalanceToPaid BalanceToPaid	  */
+	public void setBalanceToPaid (BigDecimal BalanceToPaid)
+	{
+		set_Value (COLUMNNAME_BalanceToPaid, BalanceToPaid);
+	}
+
+	/** Get BalanceToPaid.
+		@return BalanceToPaid	  */
+	public BigDecimal getBalanceToPaid () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_BalanceToPaid);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
 	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException
     {
 		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_Name)
@@ -121,6 +138,23 @@ public class X_HR_LoanEarllySettle extends PO implements I_HR_LoanEarllySettle, 
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Deduction.
+		@param Deduction Deduction	  */
+	public void setDeduction (BigDecimal Deduction)
+	{
+		set_Value (COLUMNNAME_Deduction, Deduction);
+	}
+
+	/** Get Deduction.
+		@return Deduction	  */
+	public BigDecimal getDeduction () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_Deduction);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
 	}
 
 	/** Set Description.
@@ -311,6 +345,31 @@ public class X_HR_LoanEarllySettle extends PO implements I_HR_LoanEarllySettle, 
 		return bd;
 	}
 
+	public spc.payroll.model.I_HR_Loan getNewHR_Loan() throws RuntimeException
+    {
+		return (spc.payroll.model.I_HR_Loan)MTable.get(getCtx(), spc.payroll.model.I_HR_Loan.Table_Name)
+			.getPO(getNewHR_Loan_ID(), get_TrxName());	}
+
+	/** Set NewHR_Loan_ID.
+		@param NewHR_Loan_ID NewHR_Loan_ID	  */
+	public void setNewHR_Loan_ID (int NewHR_Loan_ID)
+	{
+		if (NewHR_Loan_ID < 1) 
+			set_Value (COLUMNNAME_NewHR_Loan_ID, null);
+		else 
+			set_Value (COLUMNNAME_NewHR_Loan_ID, Integer.valueOf(NewHR_Loan_ID));
+	}
+
+	/** Get NewHR_Loan_ID.
+		@return NewHR_Loan_ID	  */
+	public int getNewHR_Loan_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_NewHR_Loan_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set New Interest Total.
 		@param NewInterestTotal New Interest Total	  */
 	public void setNewInterestTotal (BigDecimal NewInterestTotal)
@@ -323,6 +382,23 @@ public class X_HR_LoanEarllySettle extends PO implements I_HR_LoanEarllySettle, 
 	public BigDecimal getNewInterestTotal () 
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_NewInterestTotal);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set NewLoanAmount.
+		@param NewLoanAmount NewLoanAmount	  */
+	public void setNewLoanAmount (BigDecimal NewLoanAmount)
+	{
+		set_Value (COLUMNNAME_NewLoanAmount, NewLoanAmount);
+	}
+
+	/** Get NewLoanAmount.
+		@return NewLoanAmount	  */
+	public BigDecimal getNewLoanAmount () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_NewLoanAmount);
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;

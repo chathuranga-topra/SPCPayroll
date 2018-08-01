@@ -72,6 +72,15 @@ public interface I_HR_LoanEarllySettle
 	/** Get Balance	  */
 	public BigDecimal getBalance();
 
+    /** Column name BalanceToPaid */
+    public static final String COLUMNNAME_BalanceToPaid = "BalanceToPaid";
+
+	/** Set BalanceToPaid	  */
+	public void setBalanceToPaid (BigDecimal BalanceToPaid);
+
+	/** Get BalanceToPaid	  */
+	public BigDecimal getBalanceToPaid();
+
     /** Column name C_BPartner_ID */
     public static final String COLUMNNAME_C_BPartner_ID = "C_BPartner_ID";
 
@@ -102,6 +111,15 @@ public interface I_HR_LoanEarllySettle
 	  * User who created this records
 	  */
 	public int getCreatedBy();
+
+    /** Column name Deduction */
+    public static final String COLUMNNAME_Deduction = "Deduction";
+
+	/** Set Deduction	  */
+	public void setDeduction (BigDecimal Deduction);
+
+	/** Get Deduction	  */
+	public BigDecimal getDeduction();
 
     /** Column name Description */
     public static final String COLUMNNAME_Description = "Description";
@@ -197,6 +215,17 @@ public interface I_HR_LoanEarllySettle
 	/** Get LateDaysInterest	  */
 	public BigDecimal getLateDaysInterest();
 
+    /** Column name NewHR_Loan_ID */
+    public static final String COLUMNNAME_NewHR_Loan_ID = "NewHR_Loan_ID";
+
+	/** Set NewHR_Loan_ID	  */
+	public void setNewHR_Loan_ID (int NewHR_Loan_ID);
+
+	/** Get NewHR_Loan_ID	  */
+	public int getNewHR_Loan_ID();
+
+	public spc.payroll.model.I_HR_Loan getNewHR_Loan() throws RuntimeException;
+
     /** Column name NewInterestTotal */
     public static final String COLUMNNAME_NewInterestTotal = "NewInterestTotal";
 
@@ -205,6 +234,15 @@ public interface I_HR_LoanEarllySettle
 
 	/** Get New Interest Total	  */
 	public BigDecimal getNewInterestTotal();
+
+    /** Column name NewLoanAmount */
+    public static final String COLUMNNAME_NewLoanAmount = "NewLoanAmount";
+
+	/** Set NewLoanAmount	  */
+	public void setNewLoanAmount (BigDecimal NewLoanAmount);
+
+	/** Get NewLoanAmount	  */
+	public BigDecimal getNewLoanAmount();
 
     /** Column name OldInterestTotal */
     public static final String COLUMNNAME_OldInterestTotal = "OldInterestTotal";

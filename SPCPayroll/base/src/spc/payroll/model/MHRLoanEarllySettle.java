@@ -45,6 +45,7 @@ public class MHRLoanEarllySettle extends X_HR_LoanEarllySettle implements DocAct
 		if(!getDocStatus().equals("DR"))
 			return true;
 		
+		
 		MHRLoan loan = (MHRLoan) getHR_Loan();
 		
 		BigDecimal ir = loan.getHR_LoanType().getRate();
@@ -71,6 +72,11 @@ public class MHRLoanEarllySettle extends X_HR_LoanEarllySettle implements DocAct
 		}
 		setPaidInstallmentCount(lastPaymentSeqNo);
 		setPayableInstallmentCount(paybleInstallmentCount);
+		
+		//Validation for half of total installment
+		if(getHR_Loan().getInstallmentCount() /2 > lastPaymentSeqNo) {
+			throw new AdempiereException("Early settlement eligable only for more than half settled loans only");
+		}
 		
 		//set balance 
 		sql = "SELECT SUM(CapitalAmt) FROM HR_LoanSchedule WHERE seqno BETWEEN ? "
@@ -227,31 +233,40 @@ public class MHRLoanEarllySettle extends X_HR_LoanEarllySettle implements DocAct
 	@Override
 	public String completeIt() {
 		
-		this.prepareIt();
-		//copy revised interest plan to loan schedule
-		MHRLoanEarllySettlelLine[] lines = this.getLines(this);
-		MHRLoanSchedule sch = null;
+		if(getType().equals("TT")) {
 		
-		for(MHRLoanEarllySettlelLine l: lines){
+			//VALIDATE FOR NEW LOAN IS COMPLETED
+			MHRLoan	loan = getNewRenewalLoan();
+			if(loan == null)
+				throw new AdempiereException("Please complete new loan for settlement");
+			//set loan information
+			setNewHR_Loan_ID(loan.getHR_Loan_ID());
+			setNewLoanAmount(loan.getLoanAmount());
 			
-			sch = new MHRLoanSchedule(getCtx(), l.getHR_LoanSchedule_ID(), get_TrxName());
-			sch.setInterestAmt(l.getRevisedInterest());
-			sch.setHR_LoanEarllySettle_ID(get_ID());
-			sch.setIsPaid(true);
-			sch.setProcessed(true);
-			sch.save();
-			l.setProcessed(true);
-			l.save();
+			//set Deduction 2 of 3 from old loan
+			BigDecimal oneOfthree = getHR_Loan().getLoanAmount().divide(new BigDecimal(3) , 2 , RoundingMode.HALF_UP)
+			.multiply(new BigDecimal(1));
+			
+			setDeduction(oneOfthree);
+			setBalanceToPaid(loan.getLoanAmount().subtract(oneOfthree ));
+			
+			//validate payment reference no
+			if(getPaymentDocumentNo()==null || getPaymentDocumentNo().length() ==0) {
+				throw new AdempiereException("Payment document no is empty!");
+			}
 		}
 		
-		if(getType().equals("FS")){//closed the loan if full paid
-			MHRLoan loan = new MHRLoan(getCtx(),sch.getHR_Loan_ID(),get_TrxName());
-			loan.closeIt();
-			setProcessed(true);
-		}
+		//set paid all installment in base loan
+		String sql = "UPDATE HR_LoanSchedule set IsPaid = 'Y' , "
+			+ " HR_LoanEarllySettle_ID =  "+get_ID()+" WHERE IsPaid = 'N' AND HR_Loan_ID = ?";
+		DB.executeUpdate(sql, getHR_Loan_ID(), get_TrxName());
+		
+		sql = "UPDATE HR_Loan set DocStatus = 'CL' , DocAction = '--' WHERE HR_Loan_ID = ?";
+		DB.executeUpdate(sql, getHR_Loan_ID(), get_TrxName());
 		
 		setDocStatus("CO");
 		setDocAction("CL");
+		setProcessed(true);
 		
 		return "Done!";
 	}
@@ -259,7 +274,7 @@ public class MHRLoanEarllySettle extends X_HR_LoanEarllySettle implements DocAct
 	@Override
 	public boolean voidIt() {
 		
-		String sql = "";
+		/*String sql = "";
 		
 		if(getDocStatus().equals("CO")){
 			//remove updated data from loan schedule
@@ -277,13 +292,22 @@ public class MHRLoanEarllySettle extends X_HR_LoanEarllySettle implements DocAct
 		}
 		
 		sql = "UPDATE HR_LoanEarllySettlelLine SET PROCESSED = 'Y' WHERE HR_LoanEarllySettle_ID = ?";
-		DB.executeUpdate(sql, get_ID(), get_TrxName());
+		DB.executeUpdate(sql, get_ID(), get_TrxName());*/
 		
 		setDocStatus("VO");
 		setDocAction("--");
 		setProcessed(true);
 		
 		return false;
+	}
+	
+	private MHRLoan getNewRenewalLoan() {
+		
+		MHRLoan loan = new Query(getCtx(), MHRLoan.Table_Name, "IsRenewalLoan = 'Y' AND HR_LoanEarllySettle_ID = ? AND DocStatus = 'CO'" , get_TrxName())
+			.setParameters(get_ID())
+			.first();
+		
+		return loan;
 	}
 
 	@Override

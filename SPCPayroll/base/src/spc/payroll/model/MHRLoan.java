@@ -47,7 +47,7 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 		//validate duplicate loans opening
 		this.validateDuplicate();
 		
-		//basic sallary :: concept is hard corded
+		//basic salary :: concept is hard corded
 		MHRConcept basicSallaryConcept = new MHRConcept(getCtx(), HardCodedVal.hr_LoanType_idBasicsalary, this.get_TrxName());
 		//no basic sallary
 		if(basicSallaryConcept == null || basicSallaryConcept.get_ID() == 0){
@@ -494,8 +494,12 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 		
 		int length = MHRLoan.getLoans(getCtx(), getC_BPartner_ID(), getHR_LoanType_ID(), " DOCSTATUS NOT IN('CL' , 'VO') AND "
 		 		+ "HR_LOAN_ID NOT IN ("+get_ID()+")", get_TrxName()).length;
-		 if(length >= 1)
-			 throw new AdempiereException("DUPLICATE LOAN DOCUMENT!Your are not allowed to open duplicate loans");
+		 if(length >= 1) {
+			 //second validation validate for renewal type new loan
+			 if(!isRenewalLoan())
+				 throw new AdempiereException("DUPLICATE LOAN DOCUMENT!Your are not allowed to open duplicate loans");
+		 }
+			 
 	}
 	
 	private void validateFastivalAdvance(){
