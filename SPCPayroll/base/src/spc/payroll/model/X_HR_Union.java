@@ -17,10 +17,12 @@
 /** Generated Model - DO NOT CHANGE */
 package spc.payroll.model;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.Properties;
 import org.compiere.model.*;
+import org.compiere.util.Env;
 
 /** Generated Model for HR_Union
  *  @author Adempiere (generated) 
@@ -39,6 +41,7 @@ public class X_HR_Union extends PO implements I_HR_Union, I_Persistent
       super (ctx, HR_Union_ID, trxName);
       /** if (HR_Union_ID == 0)
         {
+			setAmount (Env.ZERO);
 			setHR_Concept_ID (0);
 			setHR_Union_ID (0);
 			setName (null);
@@ -72,6 +75,26 @@ public class X_HR_Union extends PO implements I_HR_Union, I_Persistent
         .append(get_ID()).append("]");
       return sb.toString();
     }
+
+	/** Set Amount.
+		@param Amount 
+		Amount in a defined currency
+	  */
+	public void setAmount (BigDecimal Amount)
+	{
+		set_Value (COLUMNNAME_Amount, Amount);
+	}
+
+	/** Get Amount.
+		@return Amount in a defined currency
+	  */
+	public BigDecimal getAmount () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_Amount);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
 
 	/** Set Description.
 		@param Description 

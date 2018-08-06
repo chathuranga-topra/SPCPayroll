@@ -85,19 +85,14 @@ public class MHREmployee extends X_HR_Employee
 				atr.setValidFrom(new Timestamp(System.currentTimeMillis()));
 				atr.setHR_Employee_ID(getHR_Employee_ID());
 				atr.setColumnType("A");
+				atr.setAmount(union.getAmount());
 				atr.save();
+				
 			}
 			
-			if(get_ValueOldAsInt(COLUMNNAME_HR_OtCategory_ID) != 0) { // delete previous records
+			if(get_ValueOldAsInt(COLUMNNAME_HR_Union_ID) != 0) { // delete previous records
 				
-				/*//validate for one employee ha more than one ot attribute
-				String sql = "SELECT count(HR_Attribute_ID) FROM HR_Attribute where HR_Concept_ID IN (SELECT hr_concept_id FROM HR_OtCategory where isactive = 'Y') "
-					+ " AND C_Bpartner_ID = ?";
-				
-				int i = DB.getSQLValue(get_TrxName(), sql, getC_BPartner_ID());
-				System.out.println("I : " + i);
-				*/
-				union = new X_HR_Union(getCtx(), get_ValueOldAsInt(COLUMNNAME_HR_OtCategory_ID), get_TrxName());
+				union = new X_HR_Union(getCtx(), get_ValueOldAsInt(COLUMNNAME_HR_Union_ID), get_TrxName());
 				
 				String sql = "SELECT HR_Attribute_ID FROM HR_Attribute where HR_Concept_ID = ? AND C_Bpartner_ID = ?";
 				int HR_Attribute_ID = DB.getSQLValue(get_TrxName(), sql
