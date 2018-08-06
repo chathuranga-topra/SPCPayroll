@@ -21,17 +21,17 @@ import java.sql.Timestamp;
 import org.compiere.model.*;
 import org.compiere.util.KeyNamePair;
 
-/** Generated Interface for HR_LoanSchedule
+/** Generated Interface for I_HRBankLoan
  *  @author Adempiere (generated) 
  *  @version Release 3.8.0
  */
-public interface I_HR_LoanSchedule 
+public interface I_I_HRBankLoan 
 {
 
-    /** TableName=HR_LoanSchedule */
-    public static final String Table_Name = "HR_LoanSchedule";
+    /** TableName=I_HRBankLoan */
+    public static final String Table_Name = "I_HRBankLoan";
 
-    /** AD_Table_ID=1000010 */
+    /** AD_Table_ID=1000030 */
     public static final int Table_ID = MTable.getTable_ID(Table_Name);
 
     KeyNamePair Model = new KeyNamePair(Table_ID, Table_Name);
@@ -63,6 +63,28 @@ public interface I_HR_LoanSchedule
 	  */
 	public int getAD_Org_ID();
 
+    /** Column name BPValue */
+    public static final String COLUMNNAME_BPValue = "BPValue";
+
+	/** Set BP Search Key.
+	  * Business Partner Key Value
+	  */
+	public void setBPValue (String BPValue);
+
+	/** Get BP Search Key.
+	  * Business Partner Key Value
+	  */
+	public String getBPValue();
+
+    /** Column name Balance */
+    public static final String COLUMNNAME_Balance = "Balance";
+
+	/** Set Balance	  */
+	public void setBalance (BigDecimal Balance);
+
+	/** Get Balance	  */
+	public BigDecimal getBalance();
+
     /** Column name CapitalAmt */
     public static final String COLUMNNAME_CapitalAmt = "CapitalAmt";
 
@@ -88,6 +110,19 @@ public interface I_HR_LoanSchedule
 	  */
 	public int getCreatedBy();
 
+    /** Column name Description */
+    public static final String COLUMNNAME_Description = "Description";
+
+	/** Set Description.
+	  * Optional short description of the record
+	  */
+	public void setDescription (String Description);
+
+	/** Get Description.
+	  * Optional short description of the record
+	  */
+	public String getDescription();
+
     /** Column name EffectiveFrom */
     public static final String COLUMNNAME_EffectiveFrom = "EffectiveFrom";
 
@@ -97,45 +132,56 @@ public interface I_HR_LoanSchedule
 	/** Get EffectiveFrom	  */
 	public Timestamp getEffectiveFrom();
 
-    /** Column name HR_LoanEarllySettle_ID */
-    public static final String COLUMNNAME_HR_LoanEarllySettle_ID = "HR_LoanEarllySettle_ID";
+    /** Column name GrantedDate */
+    public static final String COLUMNNAME_GrantedDate = "GrantedDate";
 
-	/** Set Earlly Settlement	  */
-	public void setHR_LoanEarllySettle_ID (int HR_LoanEarllySettle_ID);
+	/** Set GrantedDate	  */
+	public void setGrantedDate (Timestamp GrantedDate);
 
-	/** Get Earlly Settlement	  */
-	public int getHR_LoanEarllySettle_ID();
+	/** Get GrantedDate	  */
+	public Timestamp getGrantedDate();
 
-	public spc.payroll.model.I_HR_LoanEarllySettle getHR_LoanEarllySettle() throws RuntimeException;
+    /** Column name HR_LoanType_ID */
+    public static final String COLUMNNAME_HR_LoanType_ID = "HR_LoanType_ID";
 
-    /** Column name HR_LoanSchedule_ID */
-    public static final String COLUMNNAME_HR_LoanSchedule_ID = "HR_LoanSchedule_ID";
+	/** Set LoanType	  */
+	public void setHR_LoanType_ID (int HR_LoanType_ID);
 
-	/** Set HR_LoanSchedule ID	  */
-	public void setHR_LoanSchedule_ID (int HR_LoanSchedule_ID);
+	/** Get LoanType	  */
+	public int getHR_LoanType_ID();
 
-	/** Get HR_LoanSchedule ID	  */
-	public int getHR_LoanSchedule_ID();
+	public spc.payroll.model.I_HR_LoanType getHR_LoanType() throws RuntimeException;
 
-    /** Column name HR_Loan_ID */
-    public static final String COLUMNNAME_HR_Loan_ID = "HR_Loan_ID";
+    /** Column name I_HRBankLoan_ID */
+    public static final String COLUMNNAME_I_HRBankLoan_ID = "I_HRBankLoan_ID";
 
-	/** Set HR_Loan ID	  */
-	public void setHR_Loan_ID (int HR_Loan_ID);
+	/** Set I_HRBankLoan ID	  */
+	public void setI_HRBankLoan_ID (int I_HRBankLoan_ID);
 
-	/** Get HR_Loan ID	  */
-	public int getHR_Loan_ID();
+	/** Get I_HRBankLoan ID	  */
+	public int getI_HRBankLoan_ID();
 
-    /** Column name HR_Movement_ID */
-    public static final String COLUMNNAME_HR_Movement_ID = "HR_Movement_ID";
+    /** Column name I_IsImported */
+    public static final String COLUMNNAME_I_IsImported = "I_IsImported";
 
-	/** Set Payroll Movement	  */
-	public void setHR_Movement_ID (int HR_Movement_ID);
+	/** Set Imported.
+	  * Has this import been processed
+	  */
+	public void setI_IsImported (boolean I_IsImported);
 
-	/** Get Payroll Movement	  */
-	public int getHR_Movement_ID();
+	/** Get Imported.
+	  * Has this import been processed
+	  */
+	public boolean isI_IsImported();
 
-	public org.eevolution.model.I_HR_Movement getHR_Movement() throws RuntimeException;
+    /** Column name InstallmentCount */
+    public static final String COLUMNNAME_InstallmentCount = "InstallmentCount";
+
+	/** Set Installment Count	  */
+	public void setInstallmentCount (int InstallmentCount);
+
+	/** Get Installment Count	  */
+	public int getInstallmentCount();
 
     /** Column name InterestAmt */
     public static final String COLUMNNAME_InterestAmt = "InterestAmt";
@@ -150,15 +196,6 @@ public interface I_HR_LoanSchedule
 	  */
 	public BigDecimal getInterestAmt();
 
-    /** Column name InterestMovement_ID */
-    public static final String COLUMNNAME_InterestMovement_ID = "InterestMovement_ID";
-
-	/** Set Interest Movement	  */
-	public void setInterestMovement_ID (int InterestMovement_ID);
-
-	/** Get Interest Movement	  */
-	public int getInterestMovement_ID();
-
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
 
@@ -172,68 +209,23 @@ public interface I_HR_LoanSchedule
 	  */
 	public boolean isActive();
 
-    /** Column name IsPaid */
-    public static final String COLUMNNAME_IsPaid = "IsPaid";
+    /** Column name LoanAmount */
+    public static final String COLUMNNAME_LoanAmount = "LoanAmount";
 
-	/** Set Paid.
-	  * The document is paid
-	  */
-	public void setIsPaid (boolean IsPaid);
+	/** Set LoanAmount	  */
+	public void setLoanAmount (BigDecimal LoanAmount);
 
-	/** Get Paid.
-	  * The document is paid
-	  */
-	public boolean isPaid();
+	/** Get LoanAmount	  */
+	public BigDecimal getLoanAmount();
 
-    /** Column name Migrated */
-    public static final String COLUMNNAME_Migrated = "Migrated";
+    /** Column name Processing */
+    public static final String COLUMNNAME_Processing = "Processing";
 
-	/** Set Migrated	  */
-	public void setMigrated (boolean Migrated);
+	/** Set Process Now	  */
+	public void setProcessing (boolean Processing);
 
-	/** Get Migrated	  */
-	public boolean isMigrated();
-
-    /** Column name PayDate */
-    public static final String COLUMNNAME_PayDate = "PayDate";
-
-	/** Set Payment Date.
-	  * Date Payment made
-	  */
-	public void setPayDate (Timestamp PayDate);
-
-	/** Get Payment Date.
-	  * Date Payment made
-	  */
-	public Timestamp getPayDate();
-
-    /** Column name Processed */
-    public static final String COLUMNNAME_Processed = "Processed";
-
-	/** Set Processed.
-	  * The document has been processed
-	  */
-	public void setProcessed (boolean Processed);
-
-	/** Get Processed.
-	  * The document has been processed
-	  */
-	public boolean isProcessed();
-
-    /** Column name SeqNo */
-    public static final String COLUMNNAME_SeqNo = "SeqNo";
-
-	/** Set Sequence.
-	  * Method of ordering records;
- lowest number comes first
-	  */
-	public void setSeqNo (int SeqNo);
-
-	/** Get Sequence.
-	  * Method of ordering records;
- lowest number comes first
-	  */
-	public int getSeqNo();
+	/** Get Process Now	  */
+	public boolean isProcessing();
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";
@@ -250,4 +242,30 @@ public interface I_HR_LoanSchedule
 	  * User who updated this records
 	  */
 	public int getUpdatedBy();
+
+    /** Column name gepf1 */
+    public static final String COLUMNNAME_gepf1 = "gepf1";
+
+	/** Set gepf1.
+	  * Alphanumeric identifier of the entity
+	  */
+	public void setgepf1 (String gepf1);
+
+	/** Get gepf1.
+	  * Alphanumeric identifier of the entity
+	  */
+	public String getgepf1();
+
+    /** Column name gepf2 */
+    public static final String COLUMNNAME_gepf2 = "gepf2";
+
+	/** Set gepf2.
+	  * Alphanumeric identifier of the entity
+	  */
+	public void setgepf2 (String gepf2);
+
+	/** Get gepf2.
+	  * Alphanumeric identifier of the entity
+	  */
+	public String getgepf2();
 }

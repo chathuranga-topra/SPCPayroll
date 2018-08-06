@@ -31,6 +31,7 @@ import org.compiere.util.DB;
 import org.compiere.util.Env;
 
 import spc.payroll.model.MHROtCategory;
+import spc.payroll.model.X_HR_Union;
 
 
 /**
@@ -66,6 +67,49 @@ public class MHREmployee extends X_HR_Employee
 	
 	
 	protected boolean beforeSave(boolean newRecord){
+		
+		//HR Union atribute
+		System.out.println(get_ValueAsInt("HR_Union_ID"));
+		System.out.println(get_ValueOldAsInt("HR_Union_ID"));
+		
+		if(getHR_Union_ID() != get_ValueOldAsInt("HR_Union_ID")) {
+			
+			X_HR_Union union = new X_HR_Union(getCtx(), getHR_Union_ID(), get_TrxName());
+			MHRAttribute atr = null;
+			if(getHR_OtCategory_ID() != 0) {
+				
+				//create new UNION attribute
+				atr = new MHRAttribute(getCtx(), 0, get_TrxName());
+				atr.setC_BPartner_ID(getC_BPartner_ID());
+				atr.setHR_Concept_ID(union.getHR_Concept_ID());
+				atr.setValidFrom(new Timestamp(System.currentTimeMillis()));
+				atr.setHR_Employee_ID(getHR_Employee_ID());
+				atr.setColumnType("A");
+				atr.save();
+			}
+			
+			if(get_ValueOldAsInt(COLUMNNAME_HR_OtCategory_ID) != 0) { // delete previous records
+				
+				/*//validate for one employee ha more than one ot attribute
+				String sql = "SELECT count(HR_Attribute_ID) FROM HR_Attribute where HR_Concept_ID IN (SELECT hr_concept_id FROM HR_OtCategory where isactive = 'Y') "
+					+ " AND C_Bpartner_ID = ?";
+				
+				int i = DB.getSQLValue(get_TrxName(), sql, getC_BPartner_ID());
+				System.out.println("I : " + i);
+				*/
+				union = new X_HR_Union(getCtx(), get_ValueOldAsInt(COLUMNNAME_HR_OtCategory_ID), get_TrxName());
+				
+				String sql = "SELECT HR_Attribute_ID FROM HR_Attribute where HR_Concept_ID = ? AND C_Bpartner_ID = ?";
+				int HR_Attribute_ID = DB.getSQLValue(get_TrxName(), sql
+					, union.getHR_Concept_ID()
+					,getC_BPartner_ID());
+				
+				atr = new MHRAttribute(getCtx(), HR_Attribute_ID, get_TrxName());
+				
+				atr.delete(true);
+				atr.save();
+			}
+		}
 		
 		//create OT attribute when selecting OT category
 		if(getHR_OtCategory_ID() != get_ValueOldAsInt(COLUMNNAME_HR_OtCategory_ID)) {

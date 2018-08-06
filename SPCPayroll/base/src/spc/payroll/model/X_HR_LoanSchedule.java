@@ -33,7 +33,7 @@ public class X_HR_LoanSchedule extends PO implements I_HR_LoanSchedule, I_Persis
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20180410L;
+	private static final long serialVersionUID = 20180802L;
 
     /** Standard Constructor */
     public X_HR_LoanSchedule (Properties ctx, int HR_LoanSchedule_ID, String trxName)
@@ -260,6 +260,44 @@ public class X_HR_LoanSchedule extends PO implements I_HR_LoanSchedule, I_Persis
 			return "Y".equals(oo);
 		}
 		return false;
+	}
+
+	/** Set Migrated.
+		@param Migrated Migrated	  */
+	public void setMigrated (boolean Migrated)
+	{
+		set_Value (COLUMNNAME_Migrated, Boolean.valueOf(Migrated));
+	}
+
+	/** Get Migrated.
+		@return Migrated	  */
+	public boolean isMigrated () 
+	{
+		Object oo = get_Value(COLUMNNAME_Migrated);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Payment Date.
+		@param PayDate 
+		Date Payment made
+	  */
+	public void setPayDate (Timestamp PayDate)
+	{
+		set_Value (COLUMNNAME_PayDate, PayDate);
+	}
+
+	/** Get Payment Date.
+		@return Date Payment made
+	  */
+	public Timestamp getPayDate () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_PayDate);
 	}
 
 	/** Set Processed.

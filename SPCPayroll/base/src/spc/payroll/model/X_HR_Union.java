@@ -18,33 +18,35 @@
 package spc.payroll.model;
 
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.Properties;
 import org.compiere.model.*;
 
-/** Generated Model for HR_LoanGurantee
+/** Generated Model for HR_Union
  *  @author Adempiere (generated) 
  *  @version Release 3.8.0 - $Id$ */
-public class X_HR_LoanGurantee extends PO implements I_HR_LoanGurantee, I_Persistent 
+public class X_HR_Union extends PO implements I_HR_Union, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20180802L;
+	private static final long serialVersionUID = 20180806L;
 
     /** Standard Constructor */
-    public X_HR_LoanGurantee (Properties ctx, int HR_LoanGurantee_ID, String trxName)
+    public X_HR_Union (Properties ctx, int HR_Union_ID, String trxName)
     {
-      super (ctx, HR_LoanGurantee_ID, trxName);
-      /** if (HR_LoanGurantee_ID == 0)
+      super (ctx, HR_Union_ID, trxName);
+      /** if (HR_Union_ID == 0)
         {
-			setC_BPartner_ID (0);
-			setHR_LoanGurantee_ID (0);
+			setHR_Concept_ID (0);
+			setHR_Union_ID (0);
+			setName (null);
         } */
     }
 
     /** Load Constructor */
-    public X_HR_LoanGurantee (Properties ctx, ResultSet rs, String trxName)
+    public X_HR_Union (Properties ctx, ResultSet rs, String trxName)
     {
       super (ctx, rs, trxName);
     }
@@ -66,33 +68,10 @@ public class X_HR_LoanGurantee extends PO implements I_HR_LoanGurantee, I_Persis
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_HR_LoanGurantee[")
+      StringBuffer sb = new StringBuffer ("X_HR_Union[")
         .append(get_ID()).append("]");
       return sb.toString();
     }
-
-	/** Set Business Partner .
-		@param C_BPartner_ID 
-		Identifies a Business Partner
-	  */
-	public void setC_BPartner_ID (int C_BPartner_ID)
-	{
-		if (C_BPartner_ID < 1) 
-			set_Value (COLUMNNAME_C_BPartner_ID, null);
-		else 
-			set_Value (COLUMNNAME_C_BPartner_ID, Integer.valueOf(C_BPartner_ID));
-	}
-
-	/** Get Business Partner .
-		@return Identifies a Business Partner
-	  */
-	public int getC_BPartner_ID () 
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_BPartner_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
 
 	/** Set Description.
 		@param Description 
@@ -111,67 +90,85 @@ public class X_HR_LoanGurantee extends PO implements I_HR_LoanGurantee, I_Persis
 		return (String)get_Value(COLUMNNAME_Description);
 	}
 
-	/** Set HR_LoanGurantee ID.
-		@param HR_LoanGurantee_ID HR_LoanGurantee ID	  */
-	public void setHR_LoanGurantee_ID (int HR_LoanGurantee_ID)
+	public org.eevolution.model.I_HR_Concept getHR_Concept() throws RuntimeException
+    {
+		return (org.eevolution.model.I_HR_Concept)MTable.get(getCtx(), org.eevolution.model.I_HR_Concept.Table_Name)
+			.getPO(getHR_Concept_ID(), get_TrxName());	}
+
+	/** Set Payroll Concept.
+		@param HR_Concept_ID 
+		The Payroll Concept allows to define all the perception and deductions elements needed to define a payroll.
+	  */
+	public void setHR_Concept_ID (int HR_Concept_ID)
 	{
-		if (HR_LoanGurantee_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_HR_LoanGurantee_ID, null);
+		if (HR_Concept_ID < 1) 
+			set_Value (COLUMNNAME_HR_Concept_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_HR_LoanGurantee_ID, Integer.valueOf(HR_LoanGurantee_ID));
+			set_Value (COLUMNNAME_HR_Concept_ID, Integer.valueOf(HR_Concept_ID));
 	}
 
-	/** Get HR_LoanGurantee ID.
-		@return HR_LoanGurantee ID	  */
-	public int getHR_LoanGurantee_ID () 
+	/** Get Payroll Concept.
+		@return The Payroll Concept allows to define all the perception and deductions elements needed to define a payroll.
+	  */
+	public int getHR_Concept_ID () 
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_HR_LoanGurantee_ID);
+		Integer ii = (Integer)get_Value(COLUMNNAME_HR_Concept_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
 	}
 
-	/** Set HR_Loan ID.
-		@param HR_Loan_ID HR_Loan ID	  */
-	public void setHR_Loan_ID (int HR_Loan_ID)
+	/** Set Union.
+		@param HR_Union_ID Union	  */
+	public void setHR_Union_ID (int HR_Union_ID)
 	{
-		if (HR_Loan_ID < 1) 
-			set_Value (COLUMNNAME_HR_Loan_ID, null);
+		if (HR_Union_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_HR_Union_ID, null);
 		else 
-			set_Value (COLUMNNAME_HR_Loan_ID, Integer.valueOf(HR_Loan_ID));
+			set_ValueNoCheck (COLUMNNAME_HR_Union_ID, Integer.valueOf(HR_Union_ID));
 	}
 
-	/** Get HR_Loan ID.
-		@return HR_Loan ID	  */
-	public int getHR_Loan_ID () 
+	/** Get Union.
+		@return Union	  */
+	public int getHR_Union_ID () 
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_HR_Loan_ID);
+		Integer ii = (Integer)get_Value(COLUMNNAME_HR_Union_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
 	}
 
-	/** Set Processed.
-		@param Processed 
-		The document has been processed
+	/** Set Name.
+		@param Name 
+		Alphanumeric identifier of the entity
 	  */
-	public void setProcessed (boolean Processed)
+	public void setName (String Name)
 	{
-		set_Value (COLUMNNAME_Processed, Boolean.valueOf(Processed));
+		set_Value (COLUMNNAME_Name, Name);
 	}
 
-	/** Get Processed.
-		@return The document has been processed
+	/** Get Name.
+		@return Alphanumeric identifier of the entity
 	  */
-	public boolean isProcessed () 
+	public String getName () 
 	{
-		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
-		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
-			return "Y".equals(oo);
-		}
-		return false;
+		return (String)get_Value(COLUMNNAME_Name);
+	}
+
+	/** Set Start Date.
+		@param StartDate 
+		First effective day (inclusive)
+	  */
+	public void setStartDate (Timestamp StartDate)
+	{
+		set_Value (COLUMNNAME_StartDate, StartDate);
+	}
+
+	/** Get Start Date.
+		@return First effective day (inclusive)
+	  */
+	public Timestamp getStartDate () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_StartDate);
 	}
 }

@@ -87,7 +87,7 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 			this.setInstallmentCount(loanType.getInstallmentCount());
 		}
 		
-		//validate for interrest attribute with loan type interest attribute
+		//validate for interest attribute with loan type interest attribute
 		if(getHR_LoanType().getInterestConcept_ID() == 0){ //no interest attribute
 			setInterestAttribute_ID(0);
 		}
