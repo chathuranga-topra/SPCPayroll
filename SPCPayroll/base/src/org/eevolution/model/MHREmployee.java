@@ -68,15 +68,12 @@ public class MHREmployee extends X_HR_Employee
 	
 	protected boolean beforeSave(boolean newRecord){
 		
-		//HR Union atribute
-		System.out.println(get_ValueAsInt("HR_Union_ID"));
-		System.out.println(get_ValueOldAsInt("HR_Union_ID"));
-		
+		//HR Union attribute
 		if(getHR_Union_ID() != get_ValueOldAsInt("HR_Union_ID")) {
 			
 			X_HR_Union union = new X_HR_Union(getCtx(), getHR_Union_ID(), get_TrxName());
 			MHRAttribute atr = null;
-			if(getHR_OtCategory_ID() != 0) {
+			if(getHR_Union_ID() != 0) {
 				
 				//create new UNION attribute
 				atr = new MHRAttribute(getCtx(), 0, get_TrxName());
