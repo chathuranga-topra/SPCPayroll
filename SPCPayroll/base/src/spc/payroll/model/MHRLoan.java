@@ -157,10 +157,15 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(dateGranted);
 		
-		//set loan payroll applicable date :: always next month 25 th
-		cal.add(Calendar.MONTH, 1);
+		//set loan payroll applicable month
+		if(getHR_LoanType().getEffectiveFor().equals(MHRLoanType.EFFECTIVEFOR_CurrentMonth)) {
+			cal.add(Calendar.MONTH , 0);
+		}else {
+			cal.add(Calendar.MONTH , 1);
+		}
+		
 		Date d = new Date(cal.getTime().getTime());
-		d.setDate(1);
+		d.setDate(1);//set loan payroll applicable date :: always next month 25 th
 		cal.setTime(d);
 		setPayrollEffectiveDate(new Timestamp(d.getTime()));
 		

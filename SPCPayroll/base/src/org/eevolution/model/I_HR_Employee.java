@@ -181,6 +181,19 @@ public interface I_HR_Employee
 	  */
 	public BigDecimal getDailySalary();
 
+    /** Column name Description */
+    public static final String COLUMNNAME_Description = "Description";
+
+	/** Set Description.
+	  * Optional short description of the record
+	  */
+	public void setDescription (String Description);
+
+	/** Get Description.
+	  * Optional short description of the record
+	  */
+	public String getDescription();
+
     /** Column name EPFETFLiable */
     public static final String COLUMNNAME_EPFETFLiable = "EPFETFLiable";
 
@@ -329,6 +342,15 @@ public interface I_HR_Employee
 
 	/** Get Ot Category	  */
 	public int getHR_OtCategory_ID();
+
+    /** Column name HR_OtDoubleCategory_ID */
+    public static final String COLUMNNAME_HR_OtDoubleCategory_ID = "HR_OtDoubleCategory_ID";
+
+	/** Set OT Category(D)	  */
+	public void setHR_OtDoubleCategory_ID (int HR_OtDoubleCategory_ID);
+
+	/** Get OT Category(D)	  */
+	public int getHR_OtDoubleCategory_ID();
 
     /** Column name HR_Payroll_ID */
     public static final String COLUMNNAME_HR_Payroll_ID = "HR_Payroll_ID";

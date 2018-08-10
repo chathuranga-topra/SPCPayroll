@@ -107,6 +107,15 @@ public interface I_HR_OTLine
 	  */
 	public int getCreatedBy();
 
+    /** Column name DoubleOTAttribute_ID */
+    public static final String COLUMNNAME_DoubleOTAttribute_ID = "DoubleOTAttribute_ID";
+
+	/** Set DoubleOTAttribute_ID	  */
+	public void setDoubleOTAttribute_ID (int DoubleOTAttribute_ID);
+
+	/** Get DoubleOTAttribute_ID	  */
+	public int getDoubleOTAttribute_ID();
+
     /** Column name HR_OTLine_ID */
     public static final String COLUMNNAME_HR_OTLine_ID = "HR_OTLine_ID";
 
@@ -196,6 +205,15 @@ public interface I_HR_OTLine
 	/** Get OTHours	  */
 	public BigDecimal getOTHours();
 
+    /** Column name OTHoursDouble */
+    public static final String COLUMNNAME_OTHoursDouble = "OTHoursDouble";
+
+	/** Set OTHoursDouble	  */
+	public void setOTHoursDouble (BigDecimal OTHoursDouble);
+
+	/** Get OTHoursDouble	  */
+	public BigDecimal getOTHoursDouble();
+
     /** Column name Processed */
     public static final String COLUMNNAME_Processed = "Processed";
 
@@ -222,6 +240,15 @@ public interface I_HR_OTLine
 	  */
 	public BigDecimal getRate();
 
+    /** Column name RateDouble */
+    public static final String COLUMNNAME_RateDouble = "RateDouble";
+
+	/** Set RateDouble	  */
+	public void setRateDouble (BigDecimal RateDouble);
+
+	/** Get RateDouble	  */
+	public BigDecimal getRateDouble();
+
     /** Column name Remarks */
     public static final String COLUMNNAME_Remarks = "Remarks";
 
@@ -243,6 +270,15 @@ public interface I_HR_OTLine
 
 	/** Get TotalOTAmt	  */
 	public BigDecimal getTotalOTAmt();
+
+    /** Column name TotalOTAmtDouble */
+    public static final String COLUMNNAME_TotalOTAmtDouble = "TotalOTAmtDouble";
+
+	/** Set TotalOTAmtDouble	  */
+	public void setTotalOTAmtDouble (BigDecimal TotalOTAmtDouble);
+
+	/** Get TotalOTAmtDouble	  */
+	public BigDecimal getTotalOTAmtDouble();
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";

@@ -84,7 +84,6 @@ public class MHREmployee extends X_HR_Employee
 				atr.setColumnType("A");
 				atr.setAmount(union.getAmount());
 				atr.save();
-				
 			}
 			
 			if(get_ValueOldAsInt(COLUMNNAME_HR_Union_ID) != 0) { // delete previous records
@@ -131,6 +130,41 @@ public class MHREmployee extends X_HR_Employee
 				System.out.println("I : " + i);
 				*/
 				otc = new MHROtCategory(getCtx(), get_ValueOldAsInt(COLUMNNAME_HR_OtCategory_ID), get_TrxName());
+				
+				String sql = "SELECT HR_Attribute_ID FROM HR_Attribute where HR_Concept_ID = ? AND C_Bpartner_ID = ?";
+				int HR_Attribute_ID = DB.getSQLValue(get_TrxName(), sql
+					, otc.getHR_Concept_ID()
+					,getC_BPartner_ID());
+				
+				atr = new MHRAttribute(getCtx(), HR_Attribute_ID, get_TrxName());
+				
+				atr.delete(true);
+				atr.save();
+			}
+		}
+		
+		//create OT attribute when selecting double OT category
+		if(getHR_OtDoubleCategory_ID() != get_ValueOldAsInt(COLUMNNAME_HR_OtDoubleCategory_ID)) {
+			
+			MHROtCategory otc = new MHROtCategory(getCtx(), getHR_OtDoubleCategory_ID(), get_TrxName());
+			MHRAttribute atr = null;
+			
+			if(getHR_OtCategory_ID() != 0) {
+				
+				//create new OT payroll attribute
+				atr = new MHRAttribute(getCtx(), 0, get_TrxName());
+				atr.setC_BPartner_ID(getC_BPartner_ID());
+				atr.setHR_Concept_ID(otc.getHR_Concept_ID());
+				atr.setValidFrom(new Timestamp(System.currentTimeMillis()));
+				atr.setHR_Employee_ID(getHR_Employee_ID());
+				atr.setColumnType("A");
+				atr.save();
+				
+			}
+			
+			if(get_ValueOldAsInt(COLUMNNAME_HR_OtDoubleCategory_ID) != 0) { // delete previous records
+				
+				otc = new MHROtCategory(getCtx(), get_ValueOldAsInt(COLUMNNAME_HR_OtDoubleCategory_ID), get_TrxName());
 				
 				String sql = "SELECT HR_Attribute_ID FROM HR_Attribute where HR_Concept_ID = ? AND C_Bpartner_ID = ?";
 				int HR_Attribute_ID = DB.getSQLValue(get_TrxName(), sql

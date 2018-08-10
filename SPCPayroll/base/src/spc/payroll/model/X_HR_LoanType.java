@@ -32,7 +32,7 @@ public class X_HR_LoanType extends PO implements I_HR_LoanType, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20180410L;
+	private static final long serialVersionUID = 20180810L;
 
     /** Standard Constructor */
     public X_HR_LoanType (Properties ctx, int HR_LoanType_ID, String trxName)
@@ -40,6 +40,7 @@ public class X_HR_LoanType extends PO implements I_HR_LoanType, I_Persistent
       super (ctx, HR_LoanType_ID, trxName);
       /** if (HR_LoanType_ID == 0)
         {
+			setEffectiveFor (null);
 			setHR_Concept_ID (0);
 // 0
 			setHR_LoanType_ID (0);
@@ -95,6 +96,27 @@ public class X_HR_LoanType extends PO implements I_HR_LoanType, I_Persistent
 	public String getDescription () 
 	{
 		return (String)get_Value(COLUMNNAME_Description);
+	}
+
+	/** EffectiveFor AD_Reference_ID=1000031 */
+	public static final int EFFECTIVEFOR_AD_Reference_ID=1000031;
+	/** Current Month = C */
+	public static final String EFFECTIVEFOR_CurrentMonth = "C";
+	/** Next Month = N */
+	public static final String EFFECTIVEFOR_NextMonth = "N";
+	/** Set EffectiveFor.
+		@param EffectiveFor EffectiveFor	  */
+	public void setEffectiveFor (String EffectiveFor)
+	{
+
+		set_Value (COLUMNNAME_EffectiveFor, EffectiveFor);
+	}
+
+	/** Get EffectiveFor.
+		@return EffectiveFor	  */
+	public String getEffectiveFor () 
+	{
+		return (String)get_Value(COLUMNNAME_EffectiveFor);
 	}
 
 	public org.eevolution.model.I_HR_Concept getHR_Concept() throws RuntimeException

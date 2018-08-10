@@ -32,7 +32,7 @@ public class X_HR_OTLine extends PO implements I_HR_OTLine, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20180425L;
+	private static final long serialVersionUID = 20180810L;
 
     /** Standard Constructor */
     public X_HR_OTLine (Properties ctx, int HR_OTLine_ID, String trxName)
@@ -79,8 +79,7 @@ public class X_HR_OTLine extends PO implements I_HR_OTLine, I_Persistent
 	  */
 	public void setBPValue (String BPValue)
 	{
-		set_Value (COLUMNNAME_BPValue, BPValue);
-	}
+		throw new IllegalArgumentException ("BPValue is virtual column");	}
 
 	/** Get BP Search Key.
 		@return Business Partner Key Value
@@ -113,6 +112,26 @@ public class X_HR_OTLine extends PO implements I_HR_OTLine, I_Persistent
 	public int getC_BPartner_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_BPartner_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set DoubleOTAttribute_ID.
+		@param DoubleOTAttribute_ID DoubleOTAttribute_ID	  */
+	public void setDoubleOTAttribute_ID (int DoubleOTAttribute_ID)
+	{
+		if (DoubleOTAttribute_ID < 1) 
+			set_Value (COLUMNNAME_DoubleOTAttribute_ID, null);
+		else 
+			set_Value (COLUMNNAME_DoubleOTAttribute_ID, Integer.valueOf(DoubleOTAttribute_ID));
+	}
+
+	/** Get DoubleOTAttribute_ID.
+		@return DoubleOTAttribute_ID	  */
+	public int getDoubleOTAttribute_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_DoubleOTAttribute_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -273,6 +292,23 @@ public class X_HR_OTLine extends PO implements I_HR_OTLine, I_Persistent
 		return bd;
 	}
 
+	/** Set OTHoursDouble.
+		@param OTHoursDouble OTHoursDouble	  */
+	public void setOTHoursDouble (BigDecimal OTHoursDouble)
+	{
+		set_Value (COLUMNNAME_OTHoursDouble, OTHoursDouble);
+	}
+
+	/** Get OTHoursDouble.
+		@return OTHoursDouble	  */
+	public BigDecimal getOTHoursDouble () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_OTHoursDouble);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
 	/** Set Processed.
 		@param Processed 
 		The document has been processed
@@ -317,6 +353,23 @@ public class X_HR_OTLine extends PO implements I_HR_OTLine, I_Persistent
 		return bd;
 	}
 
+	/** Set RateDouble.
+		@param RateDouble RateDouble	  */
+	public void setRateDouble (BigDecimal RateDouble)
+	{
+		set_Value (COLUMNNAME_RateDouble, RateDouble);
+	}
+
+	/** Get RateDouble.
+		@return RateDouble	  */
+	public BigDecimal getRateDouble () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_RateDouble);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
 	/** Set Remarks.
 		@param Remarks 
 		Remarks
@@ -346,6 +399,23 @@ public class X_HR_OTLine extends PO implements I_HR_OTLine, I_Persistent
 	public BigDecimal getTotalOTAmt () 
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_TotalOTAmt);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set TotalOTAmtDouble.
+		@param TotalOTAmtDouble TotalOTAmtDouble	  */
+	public void setTotalOTAmtDouble (BigDecimal TotalOTAmtDouble)
+	{
+		set_Value (COLUMNNAME_TotalOTAmtDouble, TotalOTAmtDouble);
+	}
+
+	/** Get TotalOTAmtDouble.
+		@return TotalOTAmtDouble	  */
+	public BigDecimal getTotalOTAmtDouble () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_TotalOTAmtDouble);
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;

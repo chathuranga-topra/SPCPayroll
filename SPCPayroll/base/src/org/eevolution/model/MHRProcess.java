@@ -1060,9 +1060,8 @@ public class MHRProcess extends X_HR_Process implements DocAction
 			while(rs.next()) {
 				
 				line = new MHROTLine(getCtx(), rs.getInt("hr_otline_id"), get_TrxName());
+				//OT Single
 				atr = new MHRAttribute(getCtx(), line.getOTAtrribute_ID() , get_TrxName());
-				
-				System.out.println(line);
 				
 				otl = createMovementFromConcept((MHRConcept)atr.getHR_Concept(), true);
 				otl.setHR_Concept_ID(atr.getHR_Concept_ID());
@@ -1073,7 +1072,21 @@ public class MHRProcess extends X_HR_Process implements DocAction
 				otl.setC_BPartner_ID(line.getC_BPartner_ID());
 				otl.save();
 				
-				System.out.println(otl);
+				//OT Double
+				if(line.getDoubleOTAttribute_ID() != 0) {
+					
+					atr = new MHRAttribute(getCtx(), line.getDoubleOTAttribute_ID() , get_TrxName());
+					
+					otl = createMovementFromConcept((MHRConcept)atr.getHR_Concept(), true);
+					otl.setHR_Concept_ID(atr.getHR_Concept_ID());
+					otl.setHR_Payroll_ID(this.getHR_Payroll_ID());
+					otl.setAmount(line.getTotalOTAmtDouble());
+					otl.setValidFrom(m_dateFrom);
+					otl.setValidTo(m_dateTo);
+					otl.setC_BPartner_ID(line.getC_BPartner_ID());
+					otl.save();
+				}
+				
 				
 				if(line.isMeal()) {
 					atr = new MHRAttribute(getCtx(), line.getMealAtrribute_ID() , get_TrxName());
@@ -1087,8 +1100,6 @@ public class MHRProcess extends X_HR_Process implements DocAction
 					otl.setC_BPartner_ID(line.getC_BPartner_ID());
 					
 					otl.save();
-					
-					System.out.println(otl);
 				}
 			}
 			

@@ -92,6 +92,15 @@ public interface I_HR_LoanType
 	  */
 	public String getDescription();
 
+    /** Column name EffectiveFor */
+    public static final String COLUMNNAME_EffectiveFor = "EffectiveFor";
+
+	/** Set EffectiveFor	  */
+	public void setEffectiveFor (String EffectiveFor);
+
+	/** Get EffectiveFor	  */
+	public String getEffectiveFor();
+
     /** Column name HR_Concept_ID */
     public static final String COLUMNNAME_HR_Concept_ID = "HR_Concept_ID";
 

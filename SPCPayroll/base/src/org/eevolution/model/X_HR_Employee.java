@@ -34,7 +34,7 @@ public class X_HR_Employee extends PO implements I_HR_Employee, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20180424L;
+	private static final long serialVersionUID = 20180810L;
 
     /** Standard Constructor */
     public X_HR_Employee (Properties ctx, int HR_Employee_ID, String trxName)
@@ -44,9 +44,7 @@ public class X_HR_Employee extends PO implements I_HR_Employee, I_Persistent
         {
 			setC_BPartner_ID (0);
 			setCategory (null);
-			setHR_Department_ID (0);
 			setHR_Employee_ID (0);
-			setHR_Job_ID (0);
 			setHR_Payroll_ID (0);
 			setPaymentRule (null);
 			setStartDate (new Timestamp( System.currentTimeMillis() ));
@@ -275,6 +273,23 @@ public class X_HR_Employee extends PO implements I_HR_Employee, I_Persistent
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;
+	}
+
+	/** Set Description.
+		@param Description 
+		Optional short description of the record
+	  */
+	public void setDescription (String Description)
+	{
+		set_Value (COLUMNNAME_Description, Description);
+	}
+
+	/** Get Description.
+		@return Optional short description of the record
+	  */
+	public String getDescription () 
+	{
+		return (String)get_Value(COLUMNNAME_Description);
 	}
 
 	/** Set EPF ETF Liable.
@@ -585,6 +600,26 @@ public class X_HR_Employee extends PO implements I_HR_Employee, I_Persistent
 	public int getHR_OtCategory_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_HR_OtCategory_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set OT Category(D).
+		@param HR_OtDoubleCategory_ID OT Category(D)	  */
+	public void setHR_OtDoubleCategory_ID (int HR_OtDoubleCategory_ID)
+	{
+		if (HR_OtDoubleCategory_ID < 1) 
+			set_Value (COLUMNNAME_HR_OtDoubleCategory_ID, null);
+		else 
+			set_Value (COLUMNNAME_HR_OtDoubleCategory_ID, Integer.valueOf(HR_OtDoubleCategory_ID));
+	}
+
+	/** Get OT Category(D).
+		@return OT Category(D)	  */
+	public int getHR_OtDoubleCategory_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_HR_OtDoubleCategory_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
