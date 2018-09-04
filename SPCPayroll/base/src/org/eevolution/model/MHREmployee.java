@@ -30,6 +30,7 @@ import org.compiere.util.CCache;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 
+import spc.payroll.model.HardCodedVal;
 import spc.payroll.model.MHROtCategory;
 import spc.payroll.model.X_HR_Union;
 
@@ -176,6 +177,34 @@ public class MHREmployee extends X_HR_Employee
 				atr.delete(true);
 				atr.save();
 			}
+		}
+		
+		//EPF ETF Liable
+		if((boolean) get_ValueOld("EPFETFLiable") != isEPFETFLiable()) {
+			MHRAttribute atr = null;
+			//No previous ETF selected
+			if(!(boolean) get_ValueOld("EPFETFLiable") && isEPFETFLiable()) {
+				//create new attribute
+				atr = new MHRAttribute(getCtx(), 0, get_TrxName());
+				atr.setC_BPartner_ID(getC_BPartner_ID());
+				atr.setHR_Concept_ID(HardCodedVal.hr_Concept_EPFETP);
+				atr.setValidFrom(new Timestamp(System.currentTimeMillis()));
+				atr.setHR_Employee_ID(getHR_Employee_ID());
+				atr.setColumnType("A");
+				atr.setAD_Rule_ID(HardCodedVal.AD_Rule_ID_EPFETP);
+				atr.save();
+			}else {
+				String sql = "SELECT HR_Attribute_ID FROM HR_Attribute where HR_Concept_ID = ? AND C_Bpartner_ID = ?";
+				int HR_Attribute_ID = DB.getSQLValue(get_TrxName(), sql
+					,HardCodedVal.hr_Concept_EPFETP
+					,getC_BPartner_ID());
+				
+				atr = new MHRAttribute(getCtx(), HR_Attribute_ID, get_TrxName());
+				
+				atr.delete(true);
+				atr.save();
+			}
+			
 		}
 		
 		return true;

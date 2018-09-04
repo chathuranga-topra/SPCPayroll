@@ -51,6 +51,7 @@ import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.TimeUtil;
 
+import spc.payroll.model.HardCodedVal;
 import spc.payroll.model.MHRLoan;
 import spc.payroll.model.MHRLoanSchedule;
 import spc.payroll.model.MHRNoPayLine;
@@ -925,6 +926,8 @@ public class MHRProcess extends X_HR_Process implements DocAction
 		int count = 1;
 		for(MBPartner bp : linesEmployee)	//=============================================================== Employee
 		{
+			//System
+			
 			log.info("Employee " + count + "  ---------------------- " + bp.getName());
 			count++;
 			m_C_BPartner_ID = bp.get_ID();
@@ -938,6 +941,9 @@ public class MHRProcess extends X_HR_Process implements DocAction
 			m_scriptCtx.put("_DateEnd", m_employee.getEndDate() == null ? TimeUtil.getDay(2999, 12, 31) : m_employee.getEndDate());
 			m_scriptCtx.put("_Days", TimeUtil.getDaysBetween(hrPeriod.getStartDate(),hrPeriod.getEndDate()) + 1);
 			m_scriptCtx.put("_C_BPartner_ID", bp.getC_BPartner_ID());
+			
+			
+			
 
 			if(getHR_Period_ID() > 0)
 				createCostCollectorMovements(bp.get_ID(), hrPeriod);
@@ -1170,7 +1176,7 @@ public class MHRProcess extends X_HR_Process implements DocAction
 			boolean printed) {
 		log.info("Calculating concept " + concept.getValue());
 		m_columnType = concept.getColumnType();
-
+		
 		List<Object> params = new ArrayList<Object>();
 		StringBuffer whereClause = new StringBuffer();
 		whereClause.append("? >= ValidFrom AND ( ? <= ValidTo OR ValidTo IS NULL)");
@@ -1186,8 +1192,8 @@ public class MHRProcess extends X_HR_Process implements DocAction
 			whereClause.append(" AND C_BPartner_ID = ? AND (HR_Employee_ID = ? OR HR_Employee_ID IS NULL)");
 			params.add(m_employee.getC_BPartner_ID());
 			params.add(m_employee.get_ID());
-		}
-
+		}		
+		
 		MHRAttribute att = new Query(getCtx(), MHRAttribute.Table_Name, whereClause.toString(), get_TrxName())
 		.setParameters(params)
 		.setOnlyActiveRecords(true)

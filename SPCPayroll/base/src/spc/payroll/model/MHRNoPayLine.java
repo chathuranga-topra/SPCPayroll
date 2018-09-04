@@ -33,7 +33,7 @@ public class MHRNoPayLine extends X_HR_NoPayLine{
 	protected boolean beforeSave(boolean newRecord){
 	
 		//validate nopay date
-		if(getNoOfDays().intValue() == 0) {
+		if(getNoOfDays().doubleValue() == 0) {
 			throw new AdempiereException("Enter no pay days count!");
 		}
 		
