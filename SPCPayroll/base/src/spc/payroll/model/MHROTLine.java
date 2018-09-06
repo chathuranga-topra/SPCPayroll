@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
@@ -106,7 +107,10 @@ public class MHROTLine extends X_HR_OTLine{
 				oTAtr.setC_BPartner_ID(getC_BPartner_ID());
 				oTAtr.setHR_Concept_ID(ot.getHR_OtCategory().getHR_Concept_ID());
 				oTAtr.setHR_Employee_ID(emp.get_ID());
-				oTAtr.setValidFrom(new Timestamp(System.currentTimeMillis()));
+				
+				Date dt = new Date();
+				dt.setDate(1);
+				oTAtr.setValidFrom(new Timestamp(dt.getTime()));
 				oTAtr.setColumnType("A");
 				oTAtr.save();
 			}else {
@@ -125,7 +129,10 @@ public class MHROTLine extends X_HR_OTLine{
 				oTAtrD.setC_BPartner_ID(getC_BPartner_ID());
 				oTAtrD.setHR_Concept_ID(ot.getHR_OtCategory().getHR_Concept_ID());
 				oTAtrD.setHR_Employee_ID(emp.get_ID());
-				oTAtrD.setValidFrom(new Timestamp(System.currentTimeMillis()));
+
+				Date dt = new Date();
+				dt.setDate(1);
+				oTAtrD.setValidFrom(new Timestamp(dt.getTime()));
 				oTAtrD.setColumnType("A");
 				oTAtrD.save();
 			}else {
@@ -146,7 +153,10 @@ public class MHROTLine extends X_HR_OTLine{
 				mealAtr.setC_BPartner_ID(getC_BPartner_ID());
 				mealAtr.setHR_Concept_ID(ot.getMealConcept_ID());
 				mealAtr.setHR_Employee_ID(emp.get_ID());
-				mealAtr.setValidFrom(new Timestamp(System.currentTimeMillis()));
+				
+				Date dt = new Date();
+				dt.setDate(1);
+				mealAtr.setValidFrom(new Timestamp(dt.getTime()));
 				mealAtr.setColumnType("A");
 				mealAtr.save();
 			}else {

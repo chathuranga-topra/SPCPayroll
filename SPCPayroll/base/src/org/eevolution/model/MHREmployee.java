@@ -19,6 +19,8 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
@@ -31,6 +33,7 @@ import org.compiere.util.DB;
 import org.compiere.util.Env;
 
 import spc.payroll.model.HardCodedVal;
+import spc.payroll.model.MHRLoanType;
 import spc.payroll.model.MHROtCategory;
 import spc.payroll.model.X_HR_Union;
 
@@ -69,6 +72,10 @@ public class MHREmployee extends X_HR_Employee
 	
 	protected boolean beforeSave(boolean newRecord){
 		
+		//set loan payroll applicable month as 1 st
+		Date date = new Date();
+		date.setDate(1);
+		
 		//HR Union attribute
 		if(getHR_Union_ID() != get_ValueOldAsInt("HR_Union_ID")) {
 			
@@ -80,7 +87,7 @@ public class MHREmployee extends X_HR_Employee
 				atr = new MHRAttribute(getCtx(), 0, get_TrxName());
 				atr.setC_BPartner_ID(getC_BPartner_ID());
 				atr.setHR_Concept_ID(union.getHR_Concept_ID());
-				atr.setValidFrom(new Timestamp(System.currentTimeMillis()));
+				atr.setValidFrom(new Timestamp(date.getTime()));
 				atr.setHR_Employee_ID(getHR_Employee_ID());
 				atr.setColumnType("A");
 				atr.setAmount(union.getAmount());
@@ -114,7 +121,7 @@ public class MHREmployee extends X_HR_Employee
 				atr = new MHRAttribute(getCtx(), 0, get_TrxName());
 				atr.setC_BPartner_ID(getC_BPartner_ID());
 				atr.setHR_Concept_ID(otc.getHR_Concept_ID());
-				atr.setValidFrom(new Timestamp(System.currentTimeMillis()));
+				atr.setValidFrom(new Timestamp(date.getTime()));
 				atr.setHR_Employee_ID(getHR_Employee_ID());
 				atr.setColumnType("A");
 				atr.save();
@@ -156,7 +163,7 @@ public class MHREmployee extends X_HR_Employee
 				atr = new MHRAttribute(getCtx(), 0, get_TrxName());
 				atr.setC_BPartner_ID(getC_BPartner_ID());
 				atr.setHR_Concept_ID(otc.getHR_Concept_ID());
-				atr.setValidFrom(new Timestamp(System.currentTimeMillis()));
+				atr.setValidFrom(new Timestamp(date.getTime()));
 				atr.setHR_Employee_ID(getHR_Employee_ID());
 				atr.setColumnType("A");
 				atr.save();
@@ -188,7 +195,7 @@ public class MHREmployee extends X_HR_Employee
 				atr = new MHRAttribute(getCtx(), 0, get_TrxName());
 				atr.setC_BPartner_ID(getC_BPartner_ID());
 				atr.setHR_Concept_ID(HardCodedVal.hr_Concept_EPFETP);
-				atr.setValidFrom(new Timestamp(System.currentTimeMillis()));
+				atr.setValidFrom(new Timestamp(date.getTime()));
 				atr.setHR_Employee_ID(getHR_Employee_ID());
 				atr.setColumnType("A");
 				atr.setAD_Rule_ID(HardCodedVal.AD_Rule_ID_EPFETP);

@@ -925,7 +925,7 @@ public class MHRProcess extends X_HR_Process implements DocAction
 		//
 		int count = 1;
 		for(MBPartner bp : linesEmployee)	//=============================================================== Employee
-		{
+		{	
 			//System
 			
 			log.info("Employee " + count + "  ---------------------- " + bp.getName());
@@ -942,19 +942,26 @@ public class MHRProcess extends X_HR_Process implements DocAction
 			m_scriptCtx.put("_Days", TimeUtil.getDaysBetween(hrPeriod.getStartDate(),hrPeriod.getEndDate()) + 1);
 			m_scriptCtx.put("_C_BPartner_ID", bp.getC_BPartner_ID());
 			
-			
-			
-
+			//SYSTEM
 			if(getHR_Period_ID() > 0)
 				createCostCollectorMovements(bp.get_ID(), hrPeriod);
 
 			m_movement.clear();
 			loadMovements(m_movement, m_C_BPartner_ID);
-			//
+			
+			//TOPRA
+			this.manualMovmentsLoan(bp);
+			this.manualMovmentsOT(bp);
+			this.manualMovmentsNopay(bp);
+			
 			for(MHRPayrollConcept pc : linesConcept) // ==================================================== Concept
 			{
 				m_HR_Concept_ID      = pc.getHR_Concept_ID();
 				MHRConcept concept = MHRConcept.get(getCtx(), m_HR_Concept_ID);
+				
+				if(concept.isSeparate())
+					continue;
+				
 				boolean printed = pc.isPrinted() || concept.isPrinted();
 				MHRMovement movement = m_movement.get(concept.get_ID()); // as it's now recursive, it can happen that the concept is already generated
 				if (movement == null) {
@@ -969,7 +976,7 @@ public class MHRProcess extends X_HR_Process implements DocAction
 					throw new AdempiereException("Concept " + concept.getValue() + " not created");
 				}
 			} // concept
-
+			
 			// Save movements:
 			for (MHRMovement m: m_movement.values())
 			{
@@ -985,77 +992,94 @@ public class MHRProcess extends X_HR_Process implements DocAction
 					if (saveThisRecord)
 						m.saveEx();
 				}
-			}
-			
-			MHRMovement cap;MHRMovement inte;
-			
-			//HR Loans
-			MHRLoan loans [] = MHRLoan.getLoans(p_ctx, bp.get_ID(), this.get_TrxName());
-			for(MHRLoan loan : loans){
-				MHRLoanSchedule schdl = MHRLoan.getDuePaymentSc(p_ctx, this.getDateAcct(), loan.get_ID(), this.get_TrxName());
-				if(schdl != null){
-					
-					cap = createMovementFromConcept((MHRConcept)loan.getHR_LoanType().getHR_Concept(), true);
-					cap.setHR_Concept_ID(loan.getHR_LoanType().getHR_Concept_ID());
-					cap.setHR_Payroll_ID(this.getHR_Payroll_ID());
-					cap.setValidFrom(m_dateFrom);
-					cap.setValidTo(m_dateTo);
-					
-					//capital and interest for two movement
-					if(loan.getHR_LoanType().getInterestConcept_ID() == 0){ //no separate concept both interest and capital ad to one concept
-						//create payroll movement
-						cap.setAmount(schdl.getCapitalAmt().add(schdl.getInterestAmt()));
-					}else{
-						cap.setAmount(schdl.getCapitalAmt());
-						inte = createMovementFromConcept((MHRConcept)loan.getHR_LoanType().getInterestConcept(), true);
-						inte.setHR_Concept_ID(loan.getHR_LoanType().getInterestConcept_ID());
-						inte.setHR_Payroll_ID(this.getHR_Payroll_ID());
-						inte.setAmount(schdl.getInterestAmt());
-						inte.setValidFrom(m_dateFrom);
-						inte.setValidTo(m_dateTo);
-						inte.save();
-						schdl.setInterestMovement_ID(inte.get_ID());
-					}
-					cap.save();
-					
-					if(getDocAction().equals("CO")) {//when only completing the schedule will be updated
-						schdl.setIsPaid(true);
-						schdl.setHR_Movement_ID(cap.get_ID());
-						schdl.setProcessed(true);
-						schdl.save();
-					}
-					
-				}
-				//close the loan when it paid all installments
-				if(MHRLoan.getBalance(loan).compareTo(loan.getBalance()) == 0){
-					
-					try{
-						loan.closeIt();
-					}catch(Exception ex){
-						ADialog.error(0, null, ex.getMessage());
-					}
-				}
-			}
-			
-		}
+			}	
 		
-		String sql = "select distinct l.hr_otline_id from HR_OTLine l " + 
-		"inner join hr_ot ot on ot.hr_ot_id = l.hr_ot_id " + 
-		"inner join hr_process p on p.hr_process_id = ot.hr_process_id " + 
-		"inner join hr_movement mov on mov.hr_process_id = p.hr_process_id " + 
-		"and l.c_bpartner_id = mov.c_bpartner_id " + 
-		"and p.hr_process_id = ? " + 
-		"and ot.docstatus = 'CO' " + 
-		"and mov.ad_client_id = ? ";
+		}
+		// Save period & finish
+		if(getHR_Period_ID()>0)
+		{
+			hrPeriod.setProcessed(true);
+			hrPeriod.saveEx();
+		}
+	} // createMovements
+	
+	private void manualMovmentsNopay(MBPartner bp){
+		
+		//No Pay
+		String sql = " select npl.hr_nopayline_id " +
+		" from hr_nopayline npl " +
+		" inner join hr_nopay np on npl.hr_nopay_ID = np.hr_nopay_ID " +
+		" and np.docstatus = 'CO' " +
+		" and np.HR_Process_ID = ? " +
+		" and np.AD_Client_ID = ? " +
+		" and npl.c_bpartner_id = ? ";
 		
 		PreparedStatement psmt = null; ResultSet rs = null;
 		
+		try {
+			
+			psmt = DB.prepareStatement(sql);
+			
+			psmt.setInt(1, this.get_ID());
+			psmt.setInt(2, this.getAD_Client_ID());
+			psmt.setInt(3, bp.get_ID());
+			
+			rs = psmt.executeQuery();
+			
+			MHRNoPayLine npl = null;
+			ResultSet rs2 = null;
+			MHRMovement mov = null;
+			MHRConcept concept = null;
+			
+			while(rs.next()) {
+				
+				npl = new MHRNoPayLine(getCtx(), rs.getInt("hr_nopayline_id"), get_TrxName());
+				rs2 = npl.getInforToCreateMovements();
+				
+				while(rs2.next()) {
+					
+					concept = new MHRConcept(getCtx(), rs2.getInt("nopayconcept_id"), get_TrxName());
+					
+					mov = createMovementFromConcept(concept, true);
+					mov.setHR_Concept_ID(concept.get_ID());
+					mov.setHR_Payroll_ID(this.getHR_Payroll_ID());
+					mov.setC_BPartner_ID(npl.getC_BPartner_ID());
+					mov.setAmount(rs2.getBigDecimal("total"));
+					mov.setValidFrom(m_dateFrom);
+					mov.setValidTo(m_dateTo);
+					mov.save();
+					
+				}
+			}
+			
+		}catch(Exception ex) {
+			//DB.close(rs, psmt);
+			//psmt = null; rs = null;
+			//throw new AdempiereException(ex.getMessage());
+			
+		}
+		
+	}
+	
+	private void manualMovmentsOT(MBPartner bp) {
 		//Over time
+		String sql = "select distinct l.hr_otline_id from HR_OTLine l " + 
+		"inner join hr_ot ot on ot.hr_ot_id = l.hr_ot_id " + 
+		"inner join hr_process p on p.hr_process_id = ot.hr_process_id " +
+		"and p.hr_process_id = ? " + 
+		"and ot.docstatus = 'CO' " + 
+		"and l.ad_client_id = ? " +
+		"and l.c_bpartner_id = ? ";
+		
+		PreparedStatement psmt = null; ResultSet rs = null;
+		
+		
 		try {
 			
 			psmt = DB.prepareStatement(sql, get_TrxName());
 			psmt.setInt(1, this.get_ID());
 			psmt.setInt(2, this.getAD_Client_ID());
+			psmt.setInt(3, bp.get_ID());
 			
 			rs = psmt.executeQuery();
 			
@@ -1115,62 +1139,61 @@ public class MHRProcess extends X_HR_Process implements DocAction
 			psmt = null; rs = null;
 			throw new AdempiereException(ex.getMessage());
 		}
+	}
+	
+	private void manualMovmentsLoan(MBPartner bp) {
 		
-		//No Pay
-		sql = " select distinct npl.hr_nopayline_id " +
-		" from HR_Movement mov " +
-		" inner join hr_nopayline npl on npl.c_bpartner_id = mov.c_bpartner_id " + 
-		" inner join hr_nopay np on mov.hr_process_id = np.hr_process_id " +
-		" where mov.HR_Process_ID=?" +
-		" and np.docstatus = 'CO' " +
-		" and mov.ad_client_id = ? " +
-		" and np.HR_NoPay_ID = npl.HR_NoPay_ID";
+		MHRMovement cap;MHRMovement inte;
 		
-		try {
-			psmt = null; rs = null;
-			psmt = DB.prepareStatement(sql, get_TrxName());
-			psmt.setInt(1, this.get_ID());
-			psmt.setInt(2, this.getAD_Client_ID());
-			
-			rs = psmt.executeQuery();
-			
-			MHRNoPayLine npl = null;
-			ResultSet rs2 = null;
-			MHRMovement mov = null;
-			MHRConcept concept = null;
-			
-			while(rs.next()) {
+		//HR Loans
+		MHRLoan loans [] = MHRLoan.getLoans(p_ctx, bp.get_ID(), this.get_TrxName());
+		for(MHRLoan loan : loans){
+			MHRLoanSchedule schdl = MHRLoan.getDuePaymentSc(p_ctx, this.getDateAcct(), loan.get_ID(), this.get_TrxName());
+			if(schdl != null){
 				
-				npl = new MHRNoPayLine(getCtx(), rs.getInt("hr_nopayline_id"), get_TrxName());
-				rs2 = npl.getInforToCreateMovements();
+				cap = createMovementFromConcept((MHRConcept)loan.getHR_LoanType().getHR_Concept(), true);
+				cap.setHR_Concept_ID(loan.getHR_LoanType().getHR_Concept_ID());
+				cap.setHR_Payroll_ID(this.getHR_Payroll_ID());
+				cap.setValidFrom(m_dateFrom);
+				cap.setValidTo(m_dateTo);
 				
-				while(rs2.next()) {
-					
-					concept = new MHRConcept(getCtx(), rs2.getInt("nopayconcept_id"), get_TrxName());
-					
-					mov = createMovementFromConcept(concept, true);
-					mov.setHR_Concept_ID(concept.get_ID());
-					mov.setHR_Payroll_ID(this.getHR_Payroll_ID());
-					mov.setC_BPartner_ID(npl.getC_BPartner_ID());
-					mov.setAmount(rs2.getBigDecimal("total"));
-					mov.setValidFrom(m_dateFrom);
-					mov.setValidTo(m_dateTo);
-					mov.save();
+				//capital and interest for two movement
+				if(loan.getHR_LoanType().getInterestConcept_ID() == 0){ //no separate concept both interest and capital ad to one concept
+					//create payroll movement
+					cap.setAmount(schdl.getCapitalAmt().add(schdl.getInterestAmt()));
+				}else{
+					cap.setAmount(schdl.getCapitalAmt());
+					inte = createMovementFromConcept((MHRConcept)loan.getHR_LoanType().getInterestConcept(), true);
+					inte.setHR_Concept_ID(loan.getHR_LoanType().getInterestConcept_ID());
+					inte.setHR_Payroll_ID(this.getHR_Payroll_ID());
+					inte.setAmount(schdl.getInterestAmt());
+					inte.setValidFrom(m_dateFrom);
+					inte.setValidTo(m_dateTo);
+					inte.save();
+					schdl.setInterestMovement_ID(inte.get_ID());
+				}
+				cap.save();
+				
+				if(getDocAction().equals("CO")) {//when only completing the schedule will be updated
+					schdl.setIsPaid(true);
+					schdl.setHR_Movement_ID(cap.get_ID());
+					schdl.setProcessed(true);
+					schdl.save();
+				}
+				
+			}
+			//close the loan when it paid all installments
+			if(MHRLoan.getBalance(loan).compareTo(loan.getBalance()) == 0){
+				
+				try{
+					loan.closeIt();
+				}catch(Exception ex){
+					ADialog.error(0, null, ex.getMessage());
 				}
 			}
-			
-		}catch(Exception ex) {
-			DB.close(rs, psmt);
-			psmt = null; rs = null;
-			throw new AdempiereException(ex.getMessage());
 		}
-		// Save period & finish
-		if(getHR_Period_ID()>0)
-		{
-			hrPeriod.setProcessed(true);
-			hrPeriod.saveEx();
-		}
-	} // createMovements
+	} 
+	
 
 	private MHRMovement createMovementFromConcept(MHRConcept concept,
 			boolean printed) {
@@ -1199,6 +1222,7 @@ public class MHRProcess extends X_HR_Process implements DocAction
 		.setOnlyActiveRecords(true)
 		.setOrderBy(MHRAttribute.COLUMNNAME_ValidFrom + " DESC")
 		.first();
+		
 		if (att == null || concept.isManual())
 		{
 			log.info("Skip concept "+concept+" - attribute not found");

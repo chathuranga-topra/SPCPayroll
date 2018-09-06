@@ -10,13 +10,9 @@ import java.util.List;
 import java.util.Properties;
 
 import org.adempiere.exceptions.AdempiereException;
-import org.compiere.model.MAttribute;
 import org.compiere.model.Query;
 import org.compiere.util.DB;
 import org.eevolution.model.MHRAttribute;
-import org.eevolution.model.MHRConcept;
-import org.eevolution.model.MHRMovement;
-import org.eevolution.model.MHRProcess;
 
 public class MHRNoPayLine extends X_HR_NoPayLine{
 
@@ -117,7 +113,7 @@ public class MHRNoPayLine extends X_HR_NoPayLine{
 					attribute = new MHRAttribute(getCtx(), 0, get_TrxName());
 					attribute.setHR_Concept_ID(npa.getNoPayConcept_ID());
 					attribute.setC_BPartner_ID(npl.getC_BPartner_ID());
-					
+					attribute.setColumnType("A");
 					//valid from current month 1st date
 					d =new Date(System.currentTimeMillis());
 					d.setDate(1);
@@ -135,9 +131,6 @@ public class MHRNoPayLine extends X_HR_NoPayLine{
 		}catch(Exception ex) {
 			
 			throw new AdempiereException(ex.getMessage());
-		}finally {
-			DB.close(rs, psmt);
-			rs = null;psmt = null;
 		}
 	}
 	
