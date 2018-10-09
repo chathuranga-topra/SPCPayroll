@@ -95,10 +95,15 @@ public class MHRNoPayLine extends X_HR_NoPayLine{
 				npa.setBaseAmt(rs.getBigDecimal("amount"));
 				npa.setNoOfDays(getNoOfDays());
 				//setup day rate
-				npa.setDayRate(rs.getBigDecimal("amount").divide(new BigDecimal(noPay.getMonthWorkDays()) , 2 , RoundingMode.HALF_UP).setScale(2, RoundingMode.HALF_UP));
+				//double dr = new BigDecimal(rs.getDouble("amount") / noPay.getMonthWorkDays()) ;
+				//npa.setDayRate(rs.getBigDecimal("amount").divide(new BigDecimal(noPay.getMonthWorkDays()) , 2 , RoundingMode.HALF_UP).setScale(2, RoundingMode.HALF_UP));
+				npa.setDayRate(new BigDecimal(rs.getDouble("amount") / noPay.getMonthWorkDays()));
 				
 				//set deduction
-				npa.setDeduction(npa.getDayRate().multiply(getNoOfDays()).setScale(2, RoundingMode.HALF_UP));
+				//double de = npa.getDayRate().doubleValue() * getNoOfDays().doubleValue();
+				//BigDecimal gde = new BigDecimal(npa.getDayRate().doubleValue() * getNoOfDays().doubleValue());
+				npa.setDeduction(new BigDecimal(npa.getDayRate().doubleValue() * getNoOfDays().doubleValue()));
+				//npa.setDeduction(npa.getDayRate().multiply(getNoOfDays()).setScale(2, RoundingMode.HALF_UP));
 				//set balance
 				npa.setBalance(npa.getBaseAmt().subtract(npa.getDeduction()));
 				
