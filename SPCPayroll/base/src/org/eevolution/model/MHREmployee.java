@@ -157,7 +157,7 @@ public class MHREmployee extends X_HR_Employee
 			MHROtCategory otc = new MHROtCategory(getCtx(), getHR_OtDoubleCategory_ID(), get_TrxName());
 			MHRAttribute atr = null;
 			
-			if(getHR_OtCategory_ID() != 0) {
+			if(getHR_OtDoubleCategory_ID() != 0) {
 				
 				//create new OT payroll attribute
 				atr = new MHRAttribute(getCtx(), 0, get_TrxName());
@@ -187,7 +187,7 @@ public class MHREmployee extends X_HR_Employee
 		}
 		
 		//EPF ETF Liable
-		if((boolean) get_ValueOld("EPFETFLiable") != isEPFETFLiable()) {
+		if(get_ValueOld("EPFETFLiable") !=null && (boolean) get_ValueOld("EPFETFLiable") != isEPFETFLiable()) {
 			MHRAttribute atr = null;
 			//No previous ETF selected
 			if(!(boolean) get_ValueOld("EPFETFLiable") && isEPFETFLiable()) {
