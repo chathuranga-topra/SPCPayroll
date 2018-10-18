@@ -153,9 +153,9 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 		
 		int installmentCount = this.getInstallmentCount();
 		MHRLoanSchedule sc = null;
-		Date dateGranted = new Date();
+		//Date dateGranted = new Date();
 		Calendar cal = Calendar.getInstance();
-		cal.setTime(dateGranted);
+		//cal.setTime(dateGranted);
 		
 		//set loan payroll applicable month
 		if(getHR_LoanType().getEffectiveFor().equals(MHRLoanType.EFFECTIVEFOR_CurrentMonth)) {
@@ -242,10 +242,7 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 	public String completeIt() {
 		
 		this.prepareIt();
-		
-		this.setGrantedDate(new Timestamp(System.currentTimeMillis()));
-		
-		
+		//this.setGrantedDate(new Timestamp(System.currentTimeMillis()));
 		//create a concept atribute for particulart employee
 		//If interest for separate concept
 		if(getHR_LoanType().getInterestConcept_ID() > 0){
