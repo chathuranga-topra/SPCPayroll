@@ -153,9 +153,9 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 		
 		int installmentCount = this.getInstallmentCount();
 		MHRLoanSchedule sc = null;
-		//Date dateGranted = new Date();
+		Date dateGranted = new Date(getGrantedDate().getTime());
 		Calendar cal = Calendar.getInstance();
-		//cal.setTime(dateGranted);
+		cal.setTime(dateGranted);
 		
 		//set loan payroll applicable month
 		if(getHR_LoanType().getEffectiveFor().equals(MHRLoanType.EFFECTIVEFOR_CurrentMonth)) {
