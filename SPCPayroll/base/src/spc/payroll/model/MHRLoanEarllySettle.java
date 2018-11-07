@@ -116,11 +116,11 @@ public class MHRLoanEarllySettle extends X_HR_LoanEarllySettle implements DocAct
 		int dayDiff = (int) TimeUnit.DAYS.convert(getSettleDate().getTime() - defaultDate.getTime(), TimeUnit.MILLISECONDS);
 		
 		if(dayDiff<0) {//minus date differences
-			
-			cal.setTime(defaultDate);
-			cal.add(Calendar.MONTH, -1);
-			defaultDate = cal.getTime();
-			dayDiff = (int) TimeUnit.DAYS.convert(getSettleDate().getTime() - defaultDate.getTime(), TimeUnit.MILLISECONDS);
+			dayDiff = 0;
+			//cal.setTime(defaultDate);
+			//cal.add(Calendar.MONTH, -1);
+			//defaultDate = cal.getTime();
+			//dayDiff = (int) TimeUnit.DAYS.convert(getSettleDate().getTime() - defaultDate.getTime(), TimeUnit.MILLISECONDS);
 		}
 		//interest for dates
 		BigDecimal lateDaysInterest = MHRLoan.getBalance(loan)

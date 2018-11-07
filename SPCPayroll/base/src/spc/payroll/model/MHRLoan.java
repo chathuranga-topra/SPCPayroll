@@ -165,7 +165,7 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 		}
 		
 		Date d = new Date(cal.getTime().getTime());
-		d.setDate(1);//set loan payroll applicable date :: always next month 25 th
+		d.setDate(1);//set loan payroll applicable date :: always next month 25th
 		cal.setTime(d);
 		setPayrollEffectiveDate(new Timestamp(d.getTime()));
 		
@@ -177,7 +177,7 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 			
 			sc = new MHRLoanSchedule(p_ctx, 0, trx.getTrxName());
 			
-			sc.setCapitalAmt(new BigDecimal(monthCapital).setScale(0, RoundingMode.HALF_UP));
+			sc.setCapitalAmt(new BigDecimal(monthCapital).setScale(0, RoundingMode.UP));
 			sc.setInterestAmt(new BigDecimal(interest).setScale(2, RoundingMode.HALF_UP));
 			sc.setHR_Loan_ID(this.get_ID());
 			sc.setSeqNo(i+1);
@@ -271,12 +271,16 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 		//set capitle atribute
 		setHR_Attribute_ID(atribute.get_ID());
 		
-		long dayDiff = getPayrollEffectiveDate().getTime() - getGrantedDate().getTime();
-		dayDiff = dayDiff/1000/60/60/24;
-		
-		//interest for date between payroll effective date and loan  granted date
-		double arreasInterest = getLoanAmount().doubleValue() * getHR_LoanType().getRate().doubleValue() / 100.00/365.00 * dayDiff;
-		
+		//based on the granted date 25th is the day wise interest end from
+		Date dayTo = new Date(getGrantedDate().getTime());
+		dayTo.setDate(25);
+		long dayDiff = dayTo.getTime() - getGrantedDate().getTime();
+		dayDiff = dayDiff/1000/60/60/24; //convert time to date
+		dayDiff ++; // loan granted date also count for the difference
+		//validate after 25 day loan is granted
+		double arreasInterest = 0.00;
+		if(dayDiff > 0)//interest for date between payroll effective date and loan  granted date
+			arreasInterest = getLoanAmount().doubleValue() * getHR_LoanType().getRate().doubleValue() / 100.00/365.00 * dayDiff;
 		//adjust the first month interest from granted date and payroll effective date
 		int HR_LoanSchedule_ID = MHRLoanSchedule.getAllIDs(MHRLoanSchedule.Table_Name, "SeqNo=1 AND HR_Loan_ID = " + get_ID(), get_TrxName())[0];
 		MHRLoanSchedule sc = new MHRLoanSchedule(getCtx(), HR_LoanSchedule_ID, get_TrxName());
