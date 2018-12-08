@@ -45,13 +45,11 @@ public class MHROTLine extends X_HR_OTLine{
 		}
 		
 		//validate Double OT categories from employee master
-		if(getOTHoursDouble().doubleValue() > 0) {//validation need to be fired only double ot are there
-			
-			otcDouble = new MHROtCategory(getCtx() , emp.getHR_OtDoubleCategory_ID() , get_TrxName());
-			if(otcDouble == null || otcDouble.get_ID() == 0){
-				throw new AdempiereException("No double OT category is selected in employee master!");
-			}
+		otcDouble = new MHROtCategory(getCtx() , emp.getHR_OtDoubleCategory_ID() , get_TrxName());
+		if(otcDouble == null || otcDouble.get_ID() == 0){
+			throw new AdempiereException("No double OT category is selected in employee master!");
 		}
+	
 		
 		//set OT rate single
 		int basedConcept_ID = otcSingle.get_ValueAsInt("BasedConcept_ID");
@@ -63,8 +61,16 @@ public class MHROTLine extends X_HR_OTLine{
 		BigDecimal rateAmt = DB.getSQLValueBD(get_TrxName(), sql,basedConcept_ID , getC_BPartner_ID() , ot.getLastPayroll_ID());
 		
 		if(rateAmt == null) {
-			rateAmt = new BigDecimal(0);
-			throw new AdempiereException("System can not calculate OT Hourly rate!");
+			//no rate means that new employee >> No last month sallary
+			//based on the current basic salary rate amt will be calculated
+			sql = "SELECT NVL(amount "+stringRate+" , 0) FROM HR_ATTRIBUTE WHERE "
+				+ "HR_ATTRIBUTE.HR_CONCEPT_ID = ? "
+				+ "AND HR_ATTRIBUTE.C_BPARTNER_ID = ?";
+			
+			rateAmt = DB.getSQLValueBD(get_TrxName(), sql,basedConcept_ID , getC_BPartner_ID());
+			
+			if(rateAmt == null)
+				throw new AdempiereException("System can not calculate OT Hourly rate!");
 		}
 		
 		setRate(rateAmt.setScale(2, RoundingMode.HALF_UP));
@@ -81,8 +87,18 @@ public class MHROTLine extends X_HR_OTLine{
 			rateAmt = DB.getSQLValueBD(get_TrxName(), sql,basedConcept_ID , getC_BPartner_ID() , ot.getLastPayroll_ID());
 			
 			if(rateAmt == null) {
-				rateAmt = new BigDecimal(0);
-				throw new AdempiereException("System can not calculate OT Hourly rate!");
+				if(rateAmt == null) {
+				//no rate means that new employee >> No last month sallary
+				//based on the current basic salary rate amt will be calculated
+					sql = "SELECT NVL(amount "+stringRate+" , 0) FROM HR_ATTRIBUTE WHERE "
+					+ "HR_ATTRIBUTE.HR_CONCEPT_ID = ? "
+					+ "AND HR_ATTRIBUTE.C_BPARTNER_ID = ?";
+				
+					rateAmt = DB.getSQLValueBD(get_TrxName(), sql,basedConcept_ID , getC_BPartner_ID());
+				
+					if(rateAmt == null)
+						throw new AdempiereException("System can not calculate OT Hourly rate!");
+				}
 			}
 			
 			setRateDouble(rateAmt.setScale(2, RoundingMode.HALF_UP));

@@ -14,6 +14,8 @@ import org.compiere.util.DB;
 @SuppressWarnings("serial")
 public class MHRNoPay extends X_HR_NoPay implements DocAction , DocOptions {
 
+	private boolean isJustProcessed = false;
+	
 	public MHRNoPay(Properties ctx, ResultSet rs, String trxName) {
 		super(ctx, rs, trxName);
 	}
@@ -37,6 +39,7 @@ public class MHRNoPay extends X_HR_NoPay implements DocAction , DocOptions {
     	if (docStatus.equals(DocumentEngine.STATUS_Completed)) {
     		//options[index++] = DocumentEngine.ACTION_ReActivate;
     		options[index++] = DocumentEngine.ACTION_Void;
+    		options[index++] = DocumentEngine.ACTION_ReActivate;
     	}
 		return index;
 	}
@@ -44,12 +47,19 @@ public class MHRNoPay extends X_HR_NoPay implements DocAction , DocOptions {
 	@Override
 	public boolean processIt(String action) throws Exception {
 		
+		if(isJustProcessed)
+			return true;
+		
 		if(getDocAction().equals("CO") && getDocStatus().equals("DR") && action.equals("--"))
 			this.completeIt();
 		else if(getDocAction().equalsIgnoreCase("CL") && getDocStatus().equals("CO"))
 			this.closeIt();
 		else if(getDocAction().equalsIgnoreCase("VO") && getDocStatus().equals("CO"))
 			this.voidIt();
+		else if(getDocAction().equalsIgnoreCase("RE") && getDocStatus().equals("CO"))
+			this.reActivateIt();
+		
+		isJustProcessed = true;
 		
 		return true;
 	}
@@ -111,7 +121,15 @@ public class MHRNoPay extends X_HR_NoPay implements DocAction , DocOptions {
 
 	@Override
 	public boolean reActivateIt() {
-		return false;
+		
+		String sql = "UPDATE HR_NoPayLine SET PROCESSED = 'N' WHERE HR_NoPay_ID = ?";
+		DB.executeUpdate(sql, this.get_ID(), get_TrxName());
+		
+		this.setProcessed(false);
+		this.setDocStatus(DOCSTATUS_Drafted);
+		this.setDocAction(DOCACTION_Complete);
+		
+		return true;
 	}
 
 	@Override
