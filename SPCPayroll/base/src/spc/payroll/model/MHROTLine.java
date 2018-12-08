@@ -55,7 +55,7 @@ public class MHROTLine extends X_HR_OTLine{
 		int basedConcept_ID = otcSingle.get_ValueAsInt("BasedConcept_ID");
 		String stringRate = otcSingle.getRate().replace('?', ' ');
 		//get basic salary based on the payroll movements
-		String sql = "select NVL(amount "+stringRate+" , 0)  from HR_Movement where hr_concept_id = ? "
+		String sql = "select "+stringRate+"  from HR_Movement where hr_concept_id = ? "
 			+ " and c_bpartner_id = ? AND HR_Process_ID = ?";
 		
 		BigDecimal rateAmt = DB.getSQLValueBD(get_TrxName(), sql,basedConcept_ID , getC_BPartner_ID() , ot.getLastPayroll_ID());
@@ -63,7 +63,7 @@ public class MHROTLine extends X_HR_OTLine{
 		if(rateAmt == null) {
 			//no rate means that new employee >> No last month sallary
 			//based on the current basic salary rate amt will be calculated
-			sql = "SELECT NVL(amount "+stringRate+" , 0) FROM HR_ATTRIBUTE WHERE "
+			sql = "SELECT "+stringRate+" FROM HR_ATTRIBUTE WHERE "
 				+ "HR_ATTRIBUTE.HR_CONCEPT_ID = ? "
 				+ "AND HR_ATTRIBUTE.C_BPARTNER_ID = ?";
 			
@@ -79,9 +79,9 @@ public class MHROTLine extends X_HR_OTLine{
 		//set OT Double
 		if(otcDouble !=null) {//only there are selected double OT
 			basedConcept_ID = otcDouble.get_ValueAsInt("BasedConcept_ID");
-			stringRate = otcDouble.getRate().replace('?', ' ');
+			stringRate = otcDouble.getRate();
 			//get basic salary based on the payroll movements
-			sql = "select NVL(amount "+stringRate+" , 0)  from HR_Movement where hr_concept_id = ? "
+			sql = "select "+stringRate+"  from HR_Movement where hr_concept_id = ? "
 				+ " and c_bpartner_id = ? AND HR_Process_ID = ?";
 			
 			rateAmt = DB.getSQLValueBD(get_TrxName(), sql,basedConcept_ID , getC_BPartner_ID() , ot.getLastPayroll_ID());
@@ -90,7 +90,7 @@ public class MHROTLine extends X_HR_OTLine{
 				if(rateAmt == null) {
 				//no rate means that new employee >> No last month sallary
 				//based on the current basic salary rate amt will be calculated
-					sql = "SELECT NVL(amount "+stringRate+" , 0) FROM HR_ATTRIBUTE WHERE "
+					sql = "SELECT "+stringRate+" FROM HR_ATTRIBUTE WHERE "
 					+ "HR_ATTRIBUTE.HR_CONCEPT_ID = ? "
 					+ "AND HR_ATTRIBUTE.C_BPARTNER_ID = ?";
 				

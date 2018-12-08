@@ -35,6 +35,7 @@ import org.compiere.model.MClient;
 import org.compiere.model.MCurrency;
 import org.compiere.model.MDocType;
 import org.compiere.model.MFactAcct;
+import org.compiere.model.MMovement;
 import org.compiere.model.MPeriod;
 import org.compiere.model.MPeriodControl;
 import org.compiere.model.MRule;
@@ -1018,7 +1019,7 @@ public class MHRProcess extends X_HR_Process implements DocAction
 		
 		try {
 			
-			psmt = DB.prepareStatement(sql);
+			psmt = DB.prepareStatement(sql , get_TrxName());
 			
 			psmt.setInt(1, this.get_ID());
 			psmt.setInt(2, this.getAD_Client_ID());
@@ -1063,7 +1064,10 @@ public class MHRProcess extends X_HR_Process implements DocAction
 	
 	private void manualMovmentsOT(MBPartner bp) {
 		//Over time
-		String sql = "select distinct l.hr_otline_id from HR_OTLine l " + 
+		String sql = "select distinct 	MAX(l.hr_otline_id) as hr_otline_id ,  "
+		+ " SUM(TotalOTAmt) as TotalOTAmt , "
+		+ " SUM(TotalOTAmtDouble) as TotalOTAmtDouble ,"
+		+ " SUM(MealAllowance) as MealAllowance from HR_OTLine l " + 
 		"inner join hr_ot ot on ot.hr_ot_id = l.hr_ot_id " + 
 		"inner join hr_process p on p.hr_process_id = ot.hr_process_id " +
 		"and p.hr_process_id = ? " + 
@@ -1089,14 +1093,19 @@ public class MHRProcess extends X_HR_Process implements DocAction
 			
 			while(rs.next()) {
 				
+				System.out.println(sql);
+				
 				line = new MHROTLine(getCtx(), rs.getInt("hr_otline_id"), get_TrxName());
+				
+				System.out.println(line);
+				
 				//OT Single
 				atr = new MHRAttribute(getCtx(), line.getOTAtrribute_ID() , get_TrxName());
 				
 				otl = createMovementFromConcept((MHRConcept)atr.getHR_Concept(), true);
 				otl.setHR_Concept_ID(atr.getHR_Concept_ID());
 				otl.setHR_Payroll_ID(this.getHR_Payroll_ID());
-				otl.setAmount(line.getTotalOTAmt());
+				otl.setAmount(rs.getBigDecimal("TotalOTAmt"));
 				otl.setValidFrom(m_dateFrom);
 				otl.setValidTo(m_dateTo);
 				otl.setC_BPartner_ID(line.getC_BPartner_ID());
@@ -1110,7 +1119,7 @@ public class MHRProcess extends X_HR_Process implements DocAction
 					otl = createMovementFromConcept((MHRConcept)atr.getHR_Concept(), true);
 					otl.setHR_Concept_ID(atr.getHR_Concept_ID());
 					otl.setHR_Payroll_ID(this.getHR_Payroll_ID());
-					otl.setAmount(line.getTotalOTAmtDouble());
+					otl.setAmount(rs.getBigDecimal("TotalOTAmtDouble"));
 					otl.setValidFrom(m_dateFrom);
 					otl.setValidTo(m_dateTo);
 					otl.setC_BPartner_ID(line.getC_BPartner_ID());
@@ -1124,11 +1133,10 @@ public class MHRProcess extends X_HR_Process implements DocAction
 					otl = createMovementFromConcept((MHRConcept)atr.getHR_Concept(), true);
 					otl.setHR_Concept_ID(atr.getHR_Concept_ID());
 					otl.setHR_Payroll_ID(this.getHR_Payroll_ID());
-					otl.setAmount(line.getMealAllowance());
+					otl.setAmount(rs.getBigDecimal("MealAllowance"));
 					otl.setValidFrom(m_dateFrom);
 					otl.setValidTo(m_dateTo);
 					otl.setC_BPartner_ID(line.getC_BPartner_ID());
-					
 					otl.save();
 				}
 			}
@@ -1137,13 +1145,13 @@ public class MHRProcess extends X_HR_Process implements DocAction
 		}catch(Exception ex) {
 			DB.close(rs, psmt);
 			psmt = null; rs = null;
-			throw new AdempiereException(ex.getMessage());
+			//throw new AdempiereException(ex.getMessage());
 		}
 	}
 	
 	private void manualMovmentsLoan(MBPartner bp) {
 		
-		MHRMovement cap;MHRMovement inte;
+		MHRMovement cap = null;MHRMovement inte = null;
 		
 		//HR Loans
 		MHRLoan loans [] = MHRLoan.getLoans(p_ctx, bp.get_ID(), this.get_TrxName());
@@ -1187,6 +1195,19 @@ public class MHRProcess extends X_HR_Process implements DocAction
 				
 				try{
 					loan.closeIt();
+					//valid ends the attribute
+					MHRAttribute atr = null;
+					if(cap != null){
+						atr = (MHRAttribute) cap.getHR_Attribute();//.setValidTo(new Timestamp(System.currentTimeMillis()));
+						atr.setValidTo(new Timestamp(System.currentTimeMillis()));
+						atr.save();
+					}
+					if(inte != null){
+						atr = (MHRAttribute) cap.getHR_Attribute();//.setValidTo(new Timestamp(System.currentTimeMillis()));
+						atr.setValidTo(new Timestamp(System.currentTimeMillis()));
+						atr.save();
+					}
+					
 				}catch(Exception ex){
 					ADialog.error(0, null, ex.getMessage());
 				}

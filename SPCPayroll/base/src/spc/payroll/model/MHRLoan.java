@@ -44,6 +44,11 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 	}
 	
 	protected boolean beforeSave(boolean newRecord){
+		
+		if(!getDocStatus().equalsIgnoreCase("DR")){
+			return true;
+		}
+		
 		//validate duplicate loans opening
 		this.validateDuplicate();
 		
