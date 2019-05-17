@@ -30,7 +30,7 @@ public class X_HR_OT extends PO implements I_HR_OT, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20180506L;
+	private static final long serialVersionUID = 20190517L;
 
     /** Standard Constructor */
     public X_HR_OT (Properties ctx, int HR_OT_ID, String trxName)
@@ -43,6 +43,7 @@ public class X_HR_OT extends PO implements I_HR_OT, I_Persistent
 			setHR_OtCategory_ID (0);
 			setHR_Period_ID (0);
 			setHR_Process_ID (0);
+			setLastPayroll_ID (0);
         } */
     }
 
@@ -307,6 +308,31 @@ public class X_HR_OT extends PO implements I_HR_OT, I_Persistent
 	public int getHR_Process_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_HR_Process_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.eevolution.model.I_HR_Process getLastPayroll() throws RuntimeException
+    {
+		return (org.eevolution.model.I_HR_Process)MTable.get(getCtx(), org.eevolution.model.I_HR_Process.Table_Name)
+			.getPO(getLastPayroll_ID(), get_TrxName());	}
+
+	/** Set Last Payroll.
+		@param LastPayroll_ID Last Payroll	  */
+	public void setLastPayroll_ID (int LastPayroll_ID)
+	{
+		if (LastPayroll_ID < 1) 
+			set_Value (COLUMNNAME_LastPayroll_ID, null);
+		else 
+			set_Value (COLUMNNAME_LastPayroll_ID, Integer.valueOf(LastPayroll_ID));
+	}
+
+	/** Get Last Payroll.
+		@return Last Payroll	  */
+	public int getLastPayroll_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_LastPayroll_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

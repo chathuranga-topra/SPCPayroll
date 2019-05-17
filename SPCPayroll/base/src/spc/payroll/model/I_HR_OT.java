@@ -199,6 +199,17 @@ public interface I_HR_OT
 	  */
 	public boolean isActive();
 
+    /** Column name LastPayroll_ID */
+    public static final String COLUMNNAME_LastPayroll_ID = "LastPayroll_ID";
+
+	/** Set Last Payroll	  */
+	public void setLastPayroll_ID (int LastPayroll_ID);
+
+	/** Get Last Payroll	  */
+	public int getLastPayroll_ID();
+
+	public org.eevolution.model.I_HR_Process getLastPayroll() throws RuntimeException;
+
     /** Column name MealConcept_ID */
     public static final String COLUMNNAME_MealConcept_ID = "MealConcept_ID";
 

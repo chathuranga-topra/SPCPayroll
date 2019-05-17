@@ -13,6 +13,11 @@ import org.compiere.util.DB;
 
 public class MHROT extends X_HR_OT implements DocAction , DocOptions {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public MHROT(Properties ctx, ResultSet rs, String trxName) {
 		super(ctx, rs, trxName);
 	}
@@ -37,6 +42,7 @@ public class MHROT extends X_HR_OT implements DocAction , DocOptions {
     	if (docStatus.equals(DocumentEngine.STATUS_Completed)) {
     		//options[index++] = DocumentEngine.ACTION_ReActivate;
     		options[index++] = DocumentEngine.ACTION_Void;
+    		options[index++] = DocumentEngine.ACTION_ReActivate;
     	}
 		return index;
 	}
@@ -50,6 +56,9 @@ public class MHROT extends X_HR_OT implements DocAction , DocOptions {
 			this.closeIt();
 		else if(getDocAction().equalsIgnoreCase("VO"))
 			this.voidIt();
+		else if(getDocAction().equalsIgnoreCase("RE")){
+			this.reActivateIt();
+		}
 		
 		return true;
 	}
@@ -88,8 +97,8 @@ public class MHROT extends X_HR_OT implements DocAction , DocOptions {
 	public String completeIt() {
 		
 		//remove non OT lines
-		String sql = "DELETE FROM HR_OTLine where HR_OT_ID= ? and OTHours <= 0 OR OTHours is null ";
-		DB.executeUpdate(sql, get_ID(), get_TrxName());
+		String sql = "";//"DELETE FROM HR_OTLine where HR_OT_ID= ? and OTHours <= 0 OR OTHours is null ";
+		//DB.executeUpdate(sql, get_ID(), get_TrxName());
 		
 		//validate lines
 		 if(MHROTLine.getLines(this).length == 0)
@@ -136,8 +145,16 @@ public class MHROT extends X_HR_OT implements DocAction , DocOptions {
 
 	@Override
 	public boolean reActivateIt() {
-		// TODO Auto-generated method stub
-		return false;
+		
+		this.setDocStatus(DOCSTATUS_Drafted);
+		this.setDocAction(DOCACTION_Prepare);
+		this.setProcessed(false);
+		
+		//update the lines
+		String sql = "UPDATE HR_OTLine set Processed = 'N' WHERE HR_OT_ID = ? ";
+		DB.executeUpdate(sql, get_ID(), get_TrxName());
+		
+		return true;
 	}
 
 	@Override

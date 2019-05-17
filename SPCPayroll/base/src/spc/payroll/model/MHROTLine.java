@@ -60,7 +60,7 @@ public class MHROTLine extends X_HR_OTLine{
 		String sql = "select NVL(amount "+stringRate+" , 0)  from HR_Movement where hr_concept_id = ? "
 			+ " and c_bpartner_id = ? AND HR_Process_ID = ?";
 		
-		BigDecimal rateAmt = DB.getSQLValueBD(get_TrxName(), sql,basedConcept_ID , getC_BPartner_ID() , ot.getHR_Process_ID());
+		BigDecimal rateAmt = DB.getSQLValueBD(get_TrxName(), sql,basedConcept_ID , getC_BPartner_ID() , ot.getLastPayroll_ID());
 		
 		if(rateAmt == null) {
 			rateAmt = new BigDecimal(0);
@@ -78,7 +78,7 @@ public class MHROTLine extends X_HR_OTLine{
 			sql = "select NVL(amount "+stringRate+" , 0)  from HR_Movement where hr_concept_id = ? "
 				+ " and c_bpartner_id = ? AND HR_Process_ID = ?";
 			
-			rateAmt = DB.getSQLValueBD(get_TrxName(), sql,basedConcept_ID , getC_BPartner_ID() , ot.getHR_Process_ID());
+			rateAmt = DB.getSQLValueBD(get_TrxName(), sql,basedConcept_ID , getC_BPartner_ID() , ot.getLastPayroll_ID());
 			
 			if(rateAmt == null) {
 				rateAmt = new BigDecimal(0);
