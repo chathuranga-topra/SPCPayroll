@@ -556,7 +556,7 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 		
 		String sql = "select p.hr_process_id from  HR_Process p " + 
 			"inner join HR_Movement m on p.hr_process_id = m.hr_process_id " + 
-			"where m.c_bpartner_id = ?  and p.docstatus IN ('CO' , 'CL') fetch first 1 rows only";
+			"where m.c_bpartner_id = ?  and p.docstatus IN ('CO' , 'CL') order by p.hr_process_id desc fetch first 1 rows only";
 		
 		return DB.getSQLValue(trxName, sql, this.getC_BPartner_ID());
 	}
@@ -575,13 +575,13 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 			throw new AdempiereException("No previous payroll movements found - 40 present validation failed");
 		
 		//this has done only based on the payroll movement
-		sql = "select p.hr_process_id,bp.name,m.hr_concept_id, " + 
+		sql = "select distinct p.hr_process_id,bp.name,m.hr_concept_id, " + 
 			" (case when m.hr_concept_category_id = ? " + 
 			" then m.amount * -1 when m.hr_concept_category_id = ? then m.amount end) * f.percentage /100  as amount " + 
 			" ,m.hr_movement_id , m.hr_concept_category_id , " + 
 			" (case when m.hr_concept_category_id = ? then  con.name " +
 			" when m.hr_concept_category_id = ? then con.name || ' - ' ||m.amount  end) as conceptname, " +
-			" m.hr_movement_id " + 
+			" m.hr_movement_id , M .amount " + 
 			" from HR_Process p " + 
 			" inner join HR_Movement m on p.hr_process_id = m.hr_process_id " + 
 			" inner join c_bpartner bp on bp.c_bpartner_id = m.c_bpartner_id " + 

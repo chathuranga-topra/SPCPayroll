@@ -27,15 +27,11 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
-
 import org.adempiere.exceptions.AdempiereException;
 import org.compiere.apps.ADialog;
 import org.compiere.model.MBPartner;
-import org.compiere.model.MClient;
-import org.compiere.model.MCurrency;
 import org.compiere.model.MDocType;
 import org.compiere.model.MFactAcct;
-import org.compiere.model.MMovement;
 import org.compiere.model.MPeriod;
 import org.compiere.model.MPeriodControl;
 import org.compiere.model.MRule;
@@ -51,8 +47,6 @@ import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.TimeUtil;
-
-import spc.payroll.model.HardCodedVal;
 import spc.payroll.model.MHRLoan;
 import spc.payroll.model.MHRLoanSchedule;
 import spc.payroll.model.MHRNoPayLine;
@@ -1067,7 +1061,9 @@ public class MHRProcess extends X_HR_Process implements DocAction
 		String sql = "select distinct 	MAX(l.hr_otline_id) as hr_otline_id ,  "
 		+ " SUM(TotalOTAmt) as TotalOTAmt , "
 		+ " SUM(TotalOTAmtDouble) as TotalOTAmtDouble ,"
-		+ " SUM(MealAllowance) as MealAllowance from HR_OTLine l " + 
+		+ " SUM(MealAllowance) as MealAllowance , "
+		+ " SUM(OTHours) as OTHours , "
+		+ " SUM(OTHoursDouble) as OTHoursDouble from HR_OTLine l " + 
 		"inner join hr_ot ot on ot.hr_ot_id = l.hr_ot_id " + 
 		"inner join hr_process p on p.hr_process_id = ot.hr_process_id " +
 		"and p.hr_process_id = ? " + 
@@ -1093,12 +1089,10 @@ public class MHRProcess extends X_HR_Process implements DocAction
 			
 			while(rs.next()) {
 				
-				System.out.println(sql);
+				if(rs.getInt("hr_otline_id") == 0)
+					continue;
 				
 				line = new MHROTLine(getCtx(), rs.getInt("hr_otline_id"), get_TrxName());
-				
-				System.out.println(line);
-				
 				//OT Single
 				atr = new MHRAttribute(getCtx(), line.getOTAtrribute_ID() , get_TrxName());
 				
@@ -1109,6 +1103,7 @@ public class MHRProcess extends X_HR_Process implements DocAction
 				otl.setValidFrom(m_dateFrom);
 				otl.setValidTo(m_dateTo);
 				otl.setC_BPartner_ID(line.getC_BPartner_ID());
+				otl.setQty(rs.getBigDecimal("OTHours"));
 				otl.save();
 				
 				//OT Double
@@ -1123,6 +1118,7 @@ public class MHRProcess extends X_HR_Process implements DocAction
 					otl.setValidFrom(m_dateFrom);
 					otl.setValidTo(m_dateTo);
 					otl.setC_BPartner_ID(line.getC_BPartner_ID());
+					otl.setQty(rs.getBigDecimal("OTHoursDouble"));
 					otl.save();
 				}
 				
@@ -1196,7 +1192,7 @@ public class MHRProcess extends X_HR_Process implements DocAction
 				try{
 					loan.closeIt();
 					//valid ends the attribute
-					MHRAttribute atr = null;
+					/*MHRAttribute atr = null;
 					if(cap != null){
 						atr = (MHRAttribute) cap.getHR_Attribute();//.setValidTo(new Timestamp(System.currentTimeMillis()));
 						atr.setValidTo(new Timestamp(System.currentTimeMillis()));
@@ -1204,9 +1200,10 @@ public class MHRProcess extends X_HR_Process implements DocAction
 					}
 					if(inte != null){
 						atr = (MHRAttribute) cap.getHR_Attribute();//.setValidTo(new Timestamp(System.currentTimeMillis()));
+						atr.setHR_Concept_ID(loan.getHR_LoanType().getHR_Concept_ID());
 						atr.setValidTo(new Timestamp(System.currentTimeMillis()));
 						atr.save();
-					}
+					}*/
 					
 				}catch(Exception ex){
 					ADialog.error(0, null, ex.getMessage());
@@ -2189,8 +2186,6 @@ public class MHRProcess extends X_HR_Process implements DocAction
 
 		return to;
 	}
-	
-	
 	
 	/**
 	 * Copy Line from Movement
