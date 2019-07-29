@@ -1152,7 +1152,9 @@ public class MHRProcess extends X_HR_Process implements DocAction
 		//HR Loans
 		MHRLoan loans [] = MHRLoan.getLoans(p_ctx, bp.get_ID(), this.get_TrxName());
 		for(MHRLoan loan : loans){
+			
 			MHRLoanSchedule schdl = MHRLoan.getDuePaymentSc(p_ctx, this.getDateAcct(), loan.get_ID(), this.get_TrxName());
+			
 			if(schdl != null){
 				
 				cap = createMovementFromConcept((MHRConcept)loan.getHR_LoanType().getHR_Concept(), true);

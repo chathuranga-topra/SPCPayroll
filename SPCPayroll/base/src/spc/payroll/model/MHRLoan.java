@@ -479,7 +479,11 @@ public class MHRLoan extends X_HR_Loan implements DocAction , DocOptions{
 			+ "ORDER BY 1 FETCH FIRST 1 ROWS ONLY";
 		
 		int MHRLoanSchedule_ID = DB.getSQLValue(trxName, sql, HR_Loan_ID);
-		return new MHRLoanSchedule(ctx ,MHRLoanSchedule_ID ,trxName);
+		
+		if(MHRLoanSchedule_ID == -1)
+			return null;
+		else
+			return new MHRLoanSchedule(ctx ,MHRLoanSchedule_ID ,trxName);
 	}
 	
 	public static BigDecimal getBalance(MHRLoan loan){
